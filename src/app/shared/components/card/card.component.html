@@ -1,0 +1,34 @@
+<div class="card app-card" [class.is-loading]="loading">
+  @if (title || subtitle || icon) {
+    <header class="card-header">
+      @if (icon) {
+        <div class="card-title-icon">
+          <i [class]="icon"></i>
+        </div>
+      }
+      <div class="card-headings">
+        <h3 class="card-title">{{ title }}</h3>
+        @if (subtitle) {
+          <p class="card-subtitle text-slate-500 text-xs">{{ subtitle }}</p>
+        }
+      </div>
+    </header>
+  }
+
+  <div class="card-content">
+    @if (loading) {
+      <div class="card-loader">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+      </div>
+    }
+    <ng-content></ng-content>
+  </div>
+
+  <footer class="card-footer" [ngClass]="{
+    'justify-start': actionsPosition === 'start',
+    'justify-center': actionsPosition === 'center',
+    'justify-end': actionsPosition === 'end'
+  }">
+    <ng-content select="[card-actions]"></ng-content>
+  </footer>
+</div>

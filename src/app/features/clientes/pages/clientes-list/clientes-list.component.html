@@ -1,0 +1,215 @@
+<!-- Page Header -->
+<app-page-header
+  title="Gestão de Clientes"
+  subtitle="Gerencie compradores e locatários da sua imobiliária"
+  buttonText="Novo Cliente"
+  buttonIcon="fa-solid fa-user-plus"
+  (buttonClick)="abrirModalNovo()">
+</app-page-header>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-total"><i class="fa-solid fa-users"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalItems() }}</span>
+      <span class="stat-label">Total de Clientes</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-comprador"><i class="fa-solid fa-house-chimney"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalCompradores() }}</span>
+      <span class="stat-label">Compradores</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-locatario"><i class="fa-solid fa-key"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalLocatarios() }}</span>
+      <span class="stat-label">Locatários</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-ambos"><i class="fa-solid fa-handshake"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalAmbos() }}</span>
+      <span class="stat-label">Ambos</span>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="filters-bar card">
+  <div class="search-box">
+    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+    <input type="text" class="input search-input" placeholder="Buscar por nome, CPF/CNPJ ou e-mail..."
+      [value]="searchTerm()" (input)="onSearchChange($event)">
+  </div>
+  <div class="filter-group">
+    <select class="input filter-select" [value]="filterTipo()" (change)="onFilterTipoChange($event)">
+      <option value="">Todos os tipos</option>
+      @for (opcao of tiposOpcoes; track opcao.value) {
+        <option [value]="opcao.value">{{ opcao.label }}</option>
+      }
+    </select>
+    <button class="btn btn-secondary btn-sm" (click)="carregarDados()" title="Atualizar lista">
+      <i class="fa-solid fa-arrows-rotate"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content-area" style="position: relative;">
+  <app-loading [visible]="loading()" message="Carregando clientes..."></app-loading>
+
+  @if (!loading() && filteredItems().length === 0) {
+    <app-empty-state icon="fa-solid fa-user-slash" title="Nenhum cliente encontrado"
+      [message]="searchTerm() || filterTipo() ? 'Tente ajustar os filtros de busca.' : 'Adicione seu primeiro cliente clicando no botão acima.'">
+    </app-empty-state>
+  }
+
+  @if (!loading() && filteredItems().length > 0) {
+    <div class="table-container table-animate">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>CPF/CNPJ</th>
+            <th>Contato</th>
+            <th>Tipo</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredItems(); track item.id) {
+            <tr class="table-row-animate">
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar">{{ getInitials(item.nome) }}</div>
+                  <div class="user-info">
+                    <span class="user-name">{{ item.nome }}</span>
+                    <span class="user-email">{{ item.email || '—' }}</span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="mono-text">{{ item.cpfCnpj | cpfCnpj }}</span></td>
+              <td>
+                <div class="contact-cell">
+                  @if (item.telefone) {
+                    <span class="contact-item"><i class="fa-solid fa-phone contact-icon"></i> {{ item.telefone | telefone }}</span>
+                  }
+                  @if (item.endereco) {
+                    <span class="contact-item contact-address"><i class="fa-solid fa-location-dot contact-icon"></i> {{ item.endereco }}</span>
+                  }
+                  @if (!item.telefone && !item.endereco) { <span class="text-muted">—</span> }
+                </div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getTipoClass(item.tipo)">
+                  {{ getTipoLabel(item.tipo) }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-action btn-action-edit" (click)="abrirModalEditar(item)" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button class="btn-action btn-action-deactivate" (click)="confirmarExclusao(item)" title="Excluir">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span class="results-count">Exibindo <strong>{{ filteredItems().length }}</strong> de <strong>{{ totalItems() }}</strong> cliente(s)</span>
+    </div>
+  }
+</div>
+
+<!-- Modal: Criar/Editar -->
+@if (showFormModal()) {
+  <div class="modal-overlay" (click)="fecharModal()">
+    <div class="modal-card modal-card-lg animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <div class="modal-icon-wrapper"><i [class]="editingItem() ? 'fa-solid fa-user-pen' : 'fa-solid fa-user-plus'"></i></div>
+          <div>
+            <h3 class="modal-title">{{ editingItem() ? 'Editar Cliente' : 'Novo Cliente' }}</h3>
+            <p class="modal-subtitle">{{ editingItem() ? 'Atualize as informações do cliente' : 'Preencha os dados para cadastrar' }}</p>
+          </div>
+        </div>
+        <button class="btn-icon modal-close" (click)="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
+        <div class="form-section">
+          <h4 class="form-section-title"><i class="fa-solid fa-user"></i> Dados Pessoais</h4>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="label"><i class="fa-solid fa-user form-label-icon"></i> Nome Completo *</label>
+              <input type="text" class="input" formControlName="nome" placeholder="Ex: Maria da Silva"
+                [class.input-error]="form.get('nome')?.invalid && form.get('nome')?.touched">
+              @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+                <span class="error-text">Nome é obrigatório</span>
+              }
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-id-card form-label-icon"></i> CPF/CNPJ *</label>
+              <input type="text" class="input" formControlName="cpfCnpj" maskCpfCnpj placeholder="000.000.000-00"
+                [class.input-error]="form.get('cpfCnpj')?.invalid && form.get('cpfCnpj')?.touched">
+              @if (form.get('cpfCnpj')?.invalid && form.get('cpfCnpj')?.touched) {
+                <span class="error-text">CPF/CNPJ é obrigatório</span>
+              }
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-tags form-label-icon"></i> Tipo de Cliente *</label>
+              <select class="input" formControlName="tipo" [class.input-error]="form.get('tipo')?.invalid && form.get('tipo')?.touched">
+                @for (opcao of tiposOpcoes; track opcao.value) {
+                  <option [value]="opcao.value">{{ opcao.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-phone form-label-icon"></i> Telefone</label>
+              <input type="text" class="input" formControlName="telefone" maskTelefone placeholder="(00) 00000-0000">
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-envelope form-label-icon"></i> E-mail</label>
+              <input type="email" class="input" formControlName="email" placeholder="email@exemplo.com"
+                [class.input-error]="form.get('email')?.invalid && form.get('email')?.touched">
+              @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                <span class="error-text">E-mail inválido</span>
+              }
+            </div>
+            <div class="form-group form-full">
+              <label class="label"><i class="fa-solid fa-location-dot form-label-icon"></i> Endereço</label>
+              <input type="text" class="input" formControlName="endereco" placeholder="Rua, número, bairro, cidade - UF">
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <h4 class="form-section-title"><i class="fa-solid fa-note-sticky"></i> Informações Adicionais</h4>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="label"><i class="fa-solid fa-comment-dots form-label-icon"></i> Observações</label>
+              <textarea class="input" formControlName="observacoes" rows="3" placeholder="Anotações sobre o cliente..."></textarea>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" (click)="fecharModal()">Cancelar</button>
+        <button class="btn btn-primary" type="button" (click)="salvar()" [disabled]="formSubmitting()">
+          @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Salvando... }
+          @else { <i class="fa-solid fa-check"></i> {{ editingItem() ? 'Salvar Alterações' : 'Cadastrar Cliente' }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<app-confirm-dialog [visible]="showConfirmDialog()" [data]="confirmDialogData()"
+  (confirm)="onConfirm()" (cancel)="onCancelConfirm()">
+</app-confirm-dialog>

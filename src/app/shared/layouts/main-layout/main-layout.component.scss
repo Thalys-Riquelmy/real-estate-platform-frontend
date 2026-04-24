@@ -1,0 +1,25 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--surface-ground);
+  padding: 0;
+}
+
+.container-fluid {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}

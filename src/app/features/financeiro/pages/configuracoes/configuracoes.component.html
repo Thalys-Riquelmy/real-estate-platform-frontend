@@ -1,0 +1,323 @@
+<!-- Page Header -->
+<app-page-header
+  title="Gestão Financeira"
+  subtitle="Visão geral, configurações e emissão de carnês"
+  buttonText="Atualizar Dados"
+  buttonIcon="fa-solid fa-arrows-rotate"
+  (buttonClick)="carregarDadosIniciais()">
+</app-page-header>
+
+<!-- Tabs Navigation -->
+<div class="tabs-nav no-print">
+  <button class="tab-btn" [class.active]="activeTab() === 'dashboard'" (click)="setTab('dashboard')">
+    <i class="fa-solid fa-chart-pie"></i> Dashboard
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'config'" (click)="setTab('config')">
+    <i class="fa-solid fa-gear"></i> Parâmetros Financeiros
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'carnes'" (click)="setTab('carnes')">
+    <i class="fa-solid fa-barcode"></i> Gerador de Carnês
+  </button>
+</div>
+
+<!-- Tab 1: Dashboard -->
+@if (activeTab() === 'dashboard') {
+  <div class="content-area animate-fadeIn no-print">
+    <app-loading [visible]="loading()" message="Carregando indicadores..."></app-loading>
+    
+    @if (!loading() && dashboard()) {
+      <div class="dashboard-grid">
+        
+        <!-- Faturamento Panel -->
+        <div class="panel panel-highlight">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-money-bill-trend-up"></i> Faturamento Mensal</h3>
+          </div>
+          <div class="panel-body">
+            <div class="faturamento-stats">
+              <div class="f-stat f-previsto">
+                <span class="f-label">Previsto</span>
+                <span class="f-value">{{ dashboard()?.faturamentoPrevistoMes | currencyBr }}</span>
+              </div>
+              <div class="f-stat f-realizado">
+                <span class="f-label">Realizado</span>
+                <span class="f-value">{{ dashboard()?.faturamentoRealizadoMes | currencyBr }}</span>
+              </div>
+            </div>
+            <div class="progress-bar-container mt-4">
+              <div class="progress-labels">
+                <span>Recebimento</span>
+                <span>{{ (dashboard()!.faturamentoRealizadoMes / dashboard()!.faturamentoPrevistoMes * 100) || 0 | number:'1.0-1' }}%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" [style.width.%]="(dashboard()!.faturamentoRealizadoMes / dashboard()!.faturamentoPrevistoMes * 100) || 0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inadimplência Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-triangle-exclamation text-danger"></i> Inadimplência Global</h3>
+          </div>
+          <div class="panel-body flex-center">
+            <div class="metric-circle" [class.danger]="dashboard()!.inadimplencia > 10">
+              <span class="m-value">{{ dashboard()?.inadimplencia }}%</span>
+              <span class="m-label">Atraso</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contratos Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-file-contract"></i> Contratos Ativos</h3>
+          </div>
+          <div class="panel-body list-stats">
+            <div class="list-item">
+              <div class="li-icon"><i class="fa-solid fa-house-user text-primary"></i></div>
+              <div class="li-content">
+                <span class="li-title">Locação</span>
+                <span class="li-value">{{ dashboard()?.contratosAtivosAluguel }} contratos</span>
+              </div>
+            </div>
+            <div class="list-item">
+              <div class="li-icon"><i class="fa-solid fa-handshake text-success"></i></div>
+              <div class="li-content">
+                <span class="li-title">Venda / Financiamento</span>
+                <span class="li-value">{{ dashboard()?.contratosAtivosVenda }} contratos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ocupação Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-building"></i> Status dos Imóveis</h3>
+          </div>
+          <div class="panel-body list-stats">
+            <div class="list-item">
+              <span class="badge-dot dot-success"></span>
+              <span class="li-title flex-1">Disponíveis</span>
+              <span class="li-value">{{ dashboard()?.totalImoveisDisponiveis }}</span>
+            </div>
+            <div class="list-item">
+              <span class="badge-dot dot-primary"></span>
+              <span class="li-title flex-1">Alugados</span>
+              <span class="li-value">{{ dashboard()?.totalImoveisAlugados }}</span>
+            </div>
+            <div class="list-item">
+              <span class="badge-dot dot-danger"></span>
+              <span class="li-title flex-1">Vendidos</span>
+              <span class="li-value">{{ dashboard()?.totalImoveisVendidos }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Tab 2: Configurações Financeiras -->
+@if (activeTab() === 'config') {
+  <div class="content-area animate-fadeIn no-print">
+    <div class="card p-5">
+      <div class="config-header mb-4">
+        <h2><i class="fa-solid fa-gear text-primary"></i> Parâmetros Globais</h2>
+        <p class="text-muted">Configure as taxas de juros, multas e índices de reajuste utilizados pelo sistema.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="salvarConfiguracao()">
+        <div class="form-section">
+          <h4 class="form-section-title">Encargos por Atraso</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="label">Multa Fixa (%)</label>
+              <div class="input-with-icon">
+                <input type="number" class="input pl-8" formControlName="multaFixa" min="0" step="0.1">
+                <i class="fa-solid fa-percent icon-left"></i>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="label">Juros ao Mês (%)</label>
+              <div class="input-with-icon">
+                <input type="number" class="input pl-8" formControlName="jurosMensal" min="0" step="0.1">
+                <i class="fa-solid fa-percent icon-left"></i>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="label">Juros ao Dia (%)</label>
+              <div class="input-with-icon">
+                <input type="number" class="input pl-8" formControlName="jurosDiario" min="0" step="0.01">
+                <i class="fa-solid fa-percent icon-left"></i>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="label">Dias de Carência</label>
+              <div class="input-with-icon">
+                <input type="number" class="input pl-8" formControlName="diasCarencia" min="0">
+                <i class="fa-regular fa-calendar icon-left"></i>
+              </div>
+              <small class="text-muted">Dias após o vencimento sem cobrança de encargos.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section mt-4">
+          <h4 class="form-section-title">Reajustes (IGP-M)</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="label">IGP-M Acumulado (12m) %</label>
+              <div class="input-with-icon">
+                <input type="number" class="input pl-8" formControlName="igpmAtual" step="0.01">
+                <i class="fa-solid fa-chart-line icon-left"></i>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="label">Mês/Ano de Referência</label>
+              <input type="date" class="input" formControlName="igpmDataReferencia">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section mt-4">
+          <h4 class="form-section-title">Pagamentos</h4>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="label">Formas de Pagamento Aceitas</label>
+              <input type="text" class="input" formControlName="formasPagamento" placeholder="Ex: PIX, Boleto, Transferência">
+            </div>
+            <div class="form-group form-full">
+              <label class="label">Observações no Carnê/Boleto</label>
+              <textarea class="input" formControlName="observacoes" rows="3" placeholder="Mensagem padrão que sairá impressa em todos os boletos..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions mt-5" style="display: flex; justify-content: flex-end;">
+          <button class="btn btn-primary" type="submit" [disabled]="formSubmitting()">
+            @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Salvando... }
+            @else { <i class="fa-solid fa-save"></i> Salvar Parâmetros }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Tab 3: Carnês -->
+@if (activeTab() === 'carnes') {
+  <div class="content-area animate-fadeIn">
+    
+    <!-- Controls (Hidden on Print) -->
+    <div class="card p-4 mb-4 no-print">
+      <h3 class="mb-3" style="font-size: 1.1rem;"><i class="fa-solid fa-barcode text-primary"></i> Gerador de Carnês</h3>
+      
+      <div class="carne-controls">
+        <div class="toggle-group">
+          <button class="btn" [class.btn-primary]="tipoCarne() === 'aluguel'" [class.btn-outline]="tipoCarne() !== 'aluguel'" (click)="setTipoCarne('aluguel')">Aluguéis</button>
+          <button class="btn" [class.btn-primary]="tipoCarne() === 'venda'" [class.btn-outline]="tipoCarne() !== 'venda'" (click)="setTipoCarne('venda')">Vendas</button>
+        </div>
+
+        <div class="select-wrapper flex-1">
+          <select class="input" [ngModel]="selectedContratoId()" (ngModelChange)="selectedContratoId.set($event)">
+            <option [ngValue]="null">Selecione um contrato para gerar carnê...</option>
+            @if (tipoCarne() === 'aluguel') {
+              @for (a of alugueis(); track a.id) {
+                <option [ngValue]="a.id">Aluguel: {{ a.imovel?.endereco }} - Locatário: {{ a.cliente?.nome }}</option>
+              }
+            } @else {
+              @for (v of vendas(); track v.id) {
+                <option [ngValue]="v.id">Venda: {{ v.imovel?.endereco }} - Comprador: {{ v.cliente?.nome }}</option>
+              }
+            }
+          </select>
+        </div>
+
+        <button class="btn btn-primary" (click)="gerarCarne()" [disabled]="!selectedContratoId() || gerandoCarne()">
+          @if (gerandoCarne()) { <i class="fa-solid fa-circle-notch fa-spin"></i> }
+          @else { <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar }
+        </button>
+        
+        @if (carneGerado()) {
+          <button class="btn btn-secondary" (click)="imprimirCarne()"><i class="fa-solid fa-print"></i> Imprimir</button>
+        }
+      </div>
+    </div>
+
+    <!-- Preview / Print Area -->
+    @if (carneGerado()) {
+      <div class="carne-preview">
+        <div class="carne-header">
+          <h2>{{ carneGerado()?.titulo }}</h2>
+          <div class="carne-info">
+            <p><strong>Cliente:</strong> {{ carneGerado()?.nomeCliente }}</p>
+            <p><strong>CPF/CNPJ:</strong> {{ carneGerado()?.cpfCnpjCliente | cpfCnpj }}</p>
+            <p><strong>Nº Contrato:</strong> {{ carneGerado()?.contratoId | number:'3.0' }}</p>
+          </div>
+        </div>
+
+        <div class="boletos-grid">
+          @for (boleto of carneGerado()?.boletos; track boleto.numeroParcela) {
+            <div class="boleto-ticket">
+              <div class="boleto-stub">
+                <div class="b-title">Recibo do Pagador</div>
+                <div class="b-row"><span>Parcela:</span> <strong>{{ boleto.numeroParcela || 'Única' }}</strong></div>
+                <div class="b-row"><span>Vencimento:</span> <strong>{{ boleto.dataVencimento | dateBr }}</strong></div>
+                <div class="b-row"><span>Valor:</span> <strong>{{ boleto.valorFinal | currencyBr }}</strong></div>
+                <div class="b-signature mt-4">Autenticação Mecânica</div>
+              </div>
+              <div class="boleto-main">
+                <div class="b-bank-line">
+                  <div class="b-bank-logo"><i class="fa-solid fa-building-columns"></i> Banco Solus</div>
+                  <div class="b-barcode-nums">{{ boleto.codigoBarras }}</div>
+                </div>
+                <div class="b-grid-fields">
+                  <div class="b-field grid-col-2">
+                    <span class="f-lbl">Local de Pagamento</span>
+                    <span class="f-val">PAGÁVEL EM QUALQUER BANCO OU CORRESPONDENTE ATÉ O VENCIMENTO</span>
+                  </div>
+                  <div class="b-field">
+                    <span class="f-lbl">Vencimento</span>
+                    <span class="f-val text-right"><strong>{{ boleto.dataVencimento | dateBr }}</strong></span>
+                  </div>
+                  <div class="b-field grid-col-2">
+                    <span class="f-lbl">Beneficiário</span>
+                    <span class="f-val">{{ configuracao()?.formasPagamento ? 'Imobiliária LTDA' : 'Empresa LTDA' }}</span>
+                  </div>
+                  <div class="b-field">
+                    <span class="f-lbl">Valor do Documento</span>
+                    <span class="f-val text-right text-bold">{{ boleto.valorFinal | currencyBr }}</span>
+                  </div>
+                  <div class="b-field grid-col-2 grid-row-2">
+                    <span class="f-lbl">Instruções (Texto de Responsabilidade do Beneficiário)</span>
+                    <span class="f-val text-sm mt-1" style="white-space: pre-line;">{{ boleto.instrucoes }}</span>
+                    <span class="f-val text-sm mt-2 text-muted">{{ configuracao()?.observacoes }}</span>
+                  </div>
+                  <div class="b-field">
+                    <span class="f-lbl">(-) Descontos / Abatimentos</span>
+                    <span class="f-val text-right"></span>
+                  </div>
+                  <div class="b-field">
+                    <span class="f-lbl">(+) Juros / Multa</span>
+                    <span class="f-val text-right"></span>
+                  </div>
+                </div>
+                <div class="b-payer mt-2">
+                  <span class="f-lbl">Pagador:</span> {{ carneGerado()?.nomeCliente }} - {{ carneGerado()?.cpfCnpjCliente | cpfCnpj }}
+                </div>
+                <div class="b-barcode-img mt-3">
+                  <i class="fa-solid fa-barcode" style="font-size: 3rem; transform: scaleY(1.5); color: #333; letter-spacing: -2px;"></i>
+                  <i class="fa-solid fa-barcode" style="font-size: 3rem; transform: scaleY(1.5); color: #333; letter-spacing: -2px; margin-left: -5px;"></i>
+                  <i class="fa-solid fa-barcode" style="font-size: 3rem; transform: scaleY(1.5); color: #333; letter-spacing: -2px; margin-left: -5px;"></i>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

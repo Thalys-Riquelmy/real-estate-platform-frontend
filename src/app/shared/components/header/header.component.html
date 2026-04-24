@@ -1,0 +1,53 @@
+<header class="header">
+  <div class="header-left">
+    <button class="menu-toggle" (click)="onMenuClick()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="logo-area">
+      <span class="app-name">SISTEMA IMOBILIÁRIO</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    @if (empresaNome()) {
+      <div class="empresa-chip hidden-mobile">
+        <i class="fa-solid fa-building"></i>
+        <span>{{ empresaNome() }}</span>
+      </div>
+    }
+
+    <div class="notification-area">
+      <button class="icon-btn">
+        <i class="fa-solid fa-bell"></i>
+        <span class="dot"></span>
+      </button>
+    </div>
+
+    <div class="user-control" (click)="toggleUserMenu()">
+      <div class="user-avatar text-center">
+        <i class="fa-solid fa-circle-user fa-2x"></i>
+      </div>
+      <div class="user-info hidden-mobile">
+        <span class="user-name">{{ userName() }}</span>
+        <span class="user-perfil">{{ userPerfil() }}</span>
+      </div>
+      <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
+
+      <!-- Dropdown Customizado -->
+      @if (showUserMenu()) {
+        <div class="custom-dropdown shadow-lg">
+          <a routerLink="/perfil" class="dropdown-item">
+            <i class="fa-solid fa-user"></i> Meu Perfil
+          </a>
+          <a routerLink="/configuracoes" class="dropdown-item">
+            <i class="fa-solid fa-gear"></i> Configurações
+          </a>
+          <div class="divider"></div>
+          <button (click)="logout()" class="dropdown-item text-danger">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

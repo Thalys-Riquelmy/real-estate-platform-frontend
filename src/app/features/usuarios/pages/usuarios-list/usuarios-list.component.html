@@ -1,0 +1,391 @@
+<!-- Page Header -->
+<app-page-header
+  title="Gestão de Usuários"
+  subtitle="Gerencie os usuários e permissões do sistema"
+  buttonText="Novo Usuário"
+  buttonIcon="fa-solid fa-user-plus"
+  (buttonClick)="abrirModalNovo()">
+</app-page-header>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-total">
+      <i class="fa-solid fa-users"></i>
+    </div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalUsuarios() }}</span>
+      <span class="stat-label">Total de Usuários</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-active">
+      <i class="fa-solid fa-user-check"></i>
+    </div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalAtivos() }}</span>
+      <span class="stat-label">Ativos</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-admin">
+      <i class="fa-solid fa-user-shield"></i>
+    </div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalAdmins() }}</span>
+      <span class="stat-label">Administradores</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-corretor">
+      <i class="fa-solid fa-user-tie"></i>
+    </div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalCorretores() }}</span>
+      <span class="stat-label">Corretores</span>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="filters-bar card">
+  <div class="search-box">
+    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+    <input
+      type="text"
+      class="input search-input"
+      placeholder="Buscar por nome ou e-mail..."
+      [value]="searchTerm()"
+      (input)="onSearchChange($event)">
+  </div>
+  <div class="filter-group">
+    <select class="input filter-select" [value]="filterPerfil()" (change)="onFilterPerfilChange($event)">
+      <option value="">Todos os perfis</option>
+      <option value="ADMIN">Administrador</option>
+      <option value="CORRETOR">Corretor</option>
+    </select>
+    <select class="input filter-select" [value]="filterStatus()" (change)="onFilterStatusChange($event)">
+      <option value="">Todos os status</option>
+      <option value="ativo">Ativo</option>
+      <option value="inativo">Inativo</option>
+    </select>
+    <button class="btn btn-secondary btn-sm" (click)="carregarUsuarios()" title="Atualizar lista">
+      <i class="fa-solid fa-arrows-rotate"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Table / Loading / Empty -->
+<div class="content-area" style="position: relative;">
+  <app-loading [visible]="loading()" message="Carregando usuários..."></app-loading>
+
+  @if (!loading() && filteredUsuarios().length === 0) {
+    <app-empty-state
+      icon="fa-solid fa-user-slash"
+      title="Nenhum usuário encontrado"
+      [message]="searchTerm() || filterPerfil() || filterStatus()
+        ? 'Tente ajustar os filtros de busca.'
+        : 'Adicione seu primeiro usuário clicando no botão acima.'">
+    </app-empty-state>
+  }
+
+  @if (!loading() && filteredUsuarios().length > 0) {
+    <div class="table-container table-animate">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>Perfil</th>
+            <th>Status</th>
+            <th>Cadastrado em</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (usuario of filteredUsuarios(); track usuario.id) {
+            <tr class="table-row-animate">
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar" [class.avatar-inactive]="!usuario.ativo">
+                    {{ getInitials(usuario.nome) }}
+                  </div>
+                  <div class="user-info">
+                    <span class="user-name">{{ usuario.nome }}</span>
+                    <span class="user-email">{{ usuario.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getPerfilClass(usuario.perfil)">
+                  <i [class]="usuario.perfil === 'ADMIN' ? 'fa-solid fa-shield-halved' : 'fa-solid fa-briefcase'" class="badge-icon"></i>
+                  {{ getPerfilLabel(usuario.perfil) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(usuario.ativo)">
+                  <span class="status-dot" [class.dot-active]="usuario.ativo" [class.dot-inactive]="!usuario.ativo"></span>
+                  {{ usuario.ativo ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+              <td>
+                <span class="date-text">{{ formatDate(usuario.createdAt) }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-action btn-action-edit" (click)="abrirModalEditar(usuario)" title="Editar">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button class="btn-action btn-action-key" (click)="abrirModalSenha(usuario)" title="Alterar Senha">
+                    <i class="fa-solid fa-key"></i>
+                  </button>
+                  <button
+                    class="btn-action"
+                    [ngClass]="usuario.ativo ? 'btn-action-deactivate' : 'btn-action-activate'"
+                    (click)="toggleStatus(usuario)"
+                    [title]="usuario.ativo ? 'Desativar' : 'Ativar'">
+                    <i [class]="usuario.ativo ? 'fa-solid fa-user-slash' : 'fa-solid fa-user-check'"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span class="results-count">
+        Exibindo <strong>{{ filteredUsuarios().length }}</strong> de <strong>{{ totalUsuarios() }}</strong> usuário(s)
+      </span>
+    </div>
+  }
+</div>
+
+<!-- Modal: Criar/Editar Usuário -->
+@if (showFormModal()) {
+  <div class="modal-overlay" (click)="fecharModalForm()">
+    <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <div class="modal-icon-wrapper">
+            <i [class]="editingUsuario() ? 'fa-solid fa-user-pen' : 'fa-solid fa-user-plus'"></i>
+          </div>
+          <div>
+            <h3 class="modal-title">{{ editingUsuario() ? 'Editar Usuário' : 'Novo Usuário' }}</h3>
+            <p class="modal-subtitle">{{ editingUsuario() ? 'Atualize as informações do usuário' : 'Preencha os dados para cadastrar um novo usuário' }}</p>
+          </div>
+        </div>
+        <button class="btn-icon modal-close" (click)="fecharModalForm()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="usuarioForm" (ngSubmit)="salvarUsuario()" class="modal-body">
+        <div class="form-grid">
+          <div class="form-group form-full">
+            <label class="label">
+              <i class="fa-solid fa-user form-label-icon"></i>
+              Nome Completo *
+            </label>
+            <input
+              type="text"
+              class="input"
+              formControlName="nome"
+              placeholder="Ex: João da Silva"
+              [class.input-error]="usuarioForm.get('nome')?.invalid && usuarioForm.get('nome')?.touched">
+            @if (usuarioForm.get('nome')?.invalid && usuarioForm.get('nome')?.touched) {
+              <span class="error-text">
+                @if (usuarioForm.get('nome')?.errors?.['required']) { Nome é obrigatório }
+                @if (usuarioForm.get('nome')?.errors?.['maxlength']) { Máximo de 100 caracteres }
+              </span>
+            }
+          </div>
+
+          <div class="form-group form-full">
+            <label class="label">
+              <i class="fa-solid fa-envelope form-label-icon"></i>
+              E-mail *
+            </label>
+            <input
+              type="email"
+              class="input"
+              formControlName="email"
+              placeholder="Ex: joao@empresa.com.br"
+              [class.input-error]="usuarioForm.get('email')?.invalid && usuarioForm.get('email')?.touched">
+            @if (usuarioForm.get('email')?.invalid && usuarioForm.get('email')?.touched) {
+              <span class="error-text">
+                @if (usuarioForm.get('email')?.errors?.['required']) { E-mail é obrigatório }
+                @if (usuarioForm.get('email')?.errors?.['email']) { E-mail inválido }
+              </span>
+            }
+          </div>
+
+          <div class="form-group form-full">
+            <label class="label">
+              <i class="fa-solid fa-lock form-label-icon"></i>
+              Senha {{ editingUsuario() ? '(deixe vazio para manter)' : '*' }}
+            </label>
+            <input
+              type="password"
+              class="input"
+              formControlName="senha"
+              placeholder="Mínimo 6 caracteres"
+              [class.input-error]="usuarioForm.get('senha')?.invalid && usuarioForm.get('senha')?.touched">
+            @if (usuarioForm.get('senha')?.invalid && usuarioForm.get('senha')?.touched) {
+              <span class="error-text">
+                @if (usuarioForm.get('senha')?.errors?.['required']) { Senha é obrigatória }
+                @if (usuarioForm.get('senha')?.errors?.['minlength']) { Mínimo de 6 caracteres }
+              </span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="label">
+              <i class="fa-solid fa-id-badge form-label-icon"></i>
+              Perfil *
+            </label>
+            <select class="input" formControlName="perfil">
+              <option [value]="'ADMIN'">Administrador</option>
+              <option [value]="'CORRETOR'">Corretor</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="label">
+              <i class="fa-solid fa-toggle-on form-label-icon"></i>
+              Status
+            </label>
+            <div class="toggle-wrapper">
+              <label class="toggle-switch">
+                <input type="checkbox" formControlName="ativo">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">{{ usuarioForm.get('ativo')?.value ? 'Ativo' : 'Inativo' }}</span>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" (click)="fecharModalForm()">
+          Cancelar
+        </button>
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="salvarUsuario()"
+          [disabled]="formSubmitting()">
+          @if (formSubmitting()) {
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            Salvando...
+          } @else {
+            <i class="fa-solid fa-check"></i>
+            {{ editingUsuario() ? 'Salvar Alterações' : 'Cadastrar Usuário' }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Alterar Senha -->
+@if (showSenhaModal()) {
+  <div class="modal-overlay" (click)="fecharModalSenha()">
+    <div class="modal-card modal-card-sm animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <div class="modal-icon-wrapper modal-icon-key">
+            <i class="fa-solid fa-key"></i>
+          </div>
+          <div>
+            <h3 class="modal-title">Alterar Senha</h3>
+            <p class="modal-subtitle">Informe a senha atual e defina uma nova senha</p>
+          </div>
+        </div>
+        <button class="btn-icon modal-close" (click)="fecharModalSenha()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="senhaForm" (ngSubmit)="alterarSenha()" class="modal-body">
+        <div class="form-group">
+          <label class="label">
+            <i class="fa-solid fa-lock form-label-icon"></i>
+            Senha Atual *
+          </label>
+          <input
+            type="password"
+            class="input"
+            formControlName="senhaAntiga"
+            placeholder="Informe a senha atual"
+            [class.input-error]="senhaForm.get('senhaAntiga')?.invalid && senhaForm.get('senhaAntiga')?.touched">
+          @if (senhaForm.get('senhaAntiga')?.invalid && senhaForm.get('senhaAntiga')?.touched) {
+            <span class="error-text">Senha atual é obrigatória</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label">
+            <i class="fa-solid fa-lock form-label-icon"></i>
+            Nova Senha *
+          </label>
+          <input
+            type="password"
+            class="input"
+            formControlName="senhaNova"
+            placeholder="Mínimo 6 caracteres"
+            [class.input-error]="senhaForm.get('senhaNova')?.invalid && senhaForm.get('senhaNova')?.touched">
+          @if (senhaForm.get('senhaNova')?.invalid && senhaForm.get('senhaNova')?.touched) {
+            <span class="error-text">
+              @if (senhaForm.get('senhaNova')?.errors?.['required']) { Nova senha é obrigatória }
+              @if (senhaForm.get('senhaNova')?.errors?.['minlength']) { Mínimo de 6 caracteres }
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label">
+            <i class="fa-solid fa-lock form-label-icon"></i>
+            Confirmar Nova Senha *
+          </label>
+          <input
+            type="password"
+            class="input"
+            formControlName="confirmarSenha"
+            placeholder="Repita a nova senha"
+            [class.input-error]="senhaForm.get('confirmarSenha')?.invalid && senhaForm.get('confirmarSenha')?.touched">
+          @if (senhaForm.get('confirmarSenha')?.invalid && senhaForm.get('confirmarSenha')?.touched) {
+            <span class="error-text">Confirmação de senha é obrigatória</span>
+          }
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" (click)="fecharModalSenha()">
+          Cancelar
+        </button>
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="alterarSenha()"
+          [disabled]="formSubmitting()">
+          @if (formSubmitting()) {
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            Alterando...
+          } @else {
+            <i class="fa-solid fa-key"></i>
+            Alterar Senha
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Confirm Dialog -->
+<app-confirm-dialog
+  [visible]="showConfirmDialog()"
+  [data]="confirmDialogData()"
+  (confirm)="onConfirm()"
+  (cancel)="onCancelConfirm()">
+</app-confirm-dialog>

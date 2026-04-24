@@ -1,0 +1,378 @@
+<!-- Page Header -->
+<app-page-header
+  title="Gestão de Vendas"
+  subtitle="Contratos de compra e venda de imóveis"
+  buttonText="Nova Venda"
+  buttonIcon="fa-solid fa-file-signature"
+  (buttonClick)="abrirModalNovo()">
+</app-page-header>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-total"><i class="fa-solid fa-file-contract"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalItems() }}</span>
+      <span class="stat-label">Total de Contratos</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-ativo"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalAtivos() }}</span>
+      <span class="stat-label">Ativos/Financiados</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-quitado"><i class="fa-solid fa-certificate"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalQuitados() }}</span>
+      <span class="stat-label">Quitados</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-valor"><i class="fa-solid fa-sack-dollar"></i></div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalFinanciado() | currencyBr }}</span>
+      <span class="stat-label">Valor Total Negociado</span>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="filters-bar card">
+  <div class="search-box">
+    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+    <input type="text" class="input search-input" placeholder="Buscar por imóvel ou cliente..."
+      [value]="searchTerm()" (input)="onSearchChange($event)">
+  </div>
+  <div class="filter-group">
+    <select class="input filter-select" [value]="filterStatus()" (change)="onFilterStatusChange($event)">
+      <option value="">Todos os status</option>
+      <option value="ativo">Ativo</option>
+      <option value="quitado">Quitado</option>
+      <option value="inadimplente">Inadimplente</option>
+      <option value="cancelado">Cancelado</option>
+    </select>
+    <button class="btn btn-secondary btn-sm" (click)="carregarDados()" title="Atualizar lista">
+      <i class="fa-solid fa-arrows-rotate"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content-area" style="position: relative;">
+  <app-loading [visible]="loading()" message="Carregando contratos de venda..."></app-loading>
+
+  @if (!loading() && filteredItems().length === 0) {
+    <app-empty-state icon="fa-solid fa-file-circle-xmark" title="Nenhum contrato encontrado"
+      [message]="searchTerm() || filterStatus() ? 'Tente ajustar os filtros de busca.' : 'Registre sua primeira venda clicando no botão acima.'">
+    </app-empty-state>
+  }
+
+  @if (!loading() && filteredItems().length > 0) {
+    <div class="table-container table-animate">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Imóvel / Cliente</th>
+            <th>Detalhes do Contrato</th>
+            <th>Valores</th>
+            <th>Status</th>
+            <th class="text-center">Parcelas</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredItems(); track item.id) {
+            <tr class="table-row-animate">
+              <td>
+                <div class="contrato-cell">
+                  <div class="imovel-info">
+                    <span class="info-title"><i class="fa-solid fa-house fa-fw text-muted"></i> {{ item.imovel?.endereco }}, {{ item.imovel?.numero || 'S/N' }}</span>
+                    <span class="info-subtitle"><i class="fa-solid fa-user fa-fw text-muted"></i> Comp: {{ item.cliente?.nome }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="contrato-detalhes">
+                  <span class="detalhe-item"><i class="fa-regular fa-calendar-check"></i> Data: {{ item.dataContrato | dateBr }}</span>
+                  <span class="detalhe-item"><i class="fa-solid fa-layer-group"></i> Parcelas: {{ item.quantidadeParcelas }}x (Dia {{ item.diaVencimento }})</span>
+                  @if (item.aplicaIgpm) {
+                    <span class="detalhe-item"><i class="fa-solid fa-chart-line"></i> Reajuste IGP-M ativo</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <div class="valores-cell">
+                  <span class="valor-item text-primary"><span class="valor-label">Total:</span> {{ item.valorImovel | currencyBr }}</span>
+                  <span class="valor-item text-success"><span class="valor-label">Entrada:</span> {{ item.valorEntrada | currencyBr }}</span>
+                  <span class="valor-item text-muted"><span class="valor-label">Financiado:</span> {{ item.saldoFinanciado | currencyBr }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(item.status)">
+                  {{ item.status | uppercase }}
+                </span>
+                <div class="status-quick-actions" style="margin-top: 0.25rem;">
+                   <select class="input" style="padding: 0.2rem; font-size: 0.7rem; height: auto;" 
+                          (change)="mudarStatusRapido(item, $any($event.target).value)">
+                     <option value="">Alterar...</option>
+                     <option value="ativo" [disabled]="item.status === 'ativo'">Ativar</option>
+                     <option value="cancelado" [disabled]="item.status === 'cancelado'">Cancelar</option>
+                     <option value="quitado" [disabled]="item.status === 'quitado'">Quitar</option>
+                   </select>
+                </div>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn btn-secondary btn-sm" (click)="abrirModalParcelas(item)" title="Ver Parcelas">
+                    <i class="fa-solid fa-list-ol"></i> Parcelas
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span class="results-count">Exibindo <strong>{{ filteredItems().length }}</strong> de <strong>{{ totalItems() }}</strong> venda(s)</span>
+    </div>
+  }
+</div>
+
+<!-- Modal: Criar Venda -->
+@if (showFormModal()) {
+  <div class="modal-overlay" (click)="fecharModal()">
+    <div class="modal-card modal-card-xl animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <div class="modal-icon-wrapper"><i class="fa-solid fa-file-signature"></i></div>
+          <div>
+            <h3 class="modal-title">Novo Contrato de Venda</h3>
+            <p class="modal-subtitle">Preencha os dados da negociação para gerar o contrato</p>
+          </div>
+        </div>
+        <button class="btn-icon modal-close" (click)="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
+        
+        <div class="form-section">
+          <h4 class="form-section-title"><i class="fa-solid fa-handshake"></i> Partes do Contrato</h4>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="label"><i class="fa-solid fa-house form-label-icon"></i> Imóvel (Apenas Disponíveis) *</label>
+              <select class="input" formControlName="imovelId" (change)="onImovelChange($event)"
+                [class.input-error]="form.get('imovelId')?.invalid && form.get('imovelId')?.touched">
+                <option [ngValue]="null">Selecione o imóvel</option>
+                @for (imov of imoveis(); track imov.id) {
+                  <option [ngValue]="imov.id">{{ imov.endereco }}, {{ imov.numero || 'S/N' }} - {{ imov.bairro }} ({{ imov.valorVenda | currencyBr }})</option>
+                }
+              </select>
+              @if (form.get('imovelId')?.invalid && form.get('imovelId')?.touched) {
+                <span class="error-text">Imóvel é obrigatório</span>
+              }
+            </div>
+            
+            <div class="form-group form-full">
+              <label class="label"><i class="fa-solid fa-user form-label-icon"></i> Comprador (Cliente) *</label>
+              <select class="input" formControlName="clienteId"
+                [class.input-error]="form.get('clienteId')?.invalid && form.get('clienteId')?.touched">
+                <option [ngValue]="null">Selecione o comprador</option>
+                @for (cli of clientes(); track cli.id) {
+                  <option [ngValue]="cli.id">{{ cli.nome }} ({{ cli.cpfCnpj }})</option>
+                }
+              </select>
+              @if (form.get('clienteId')?.invalid && form.get('clienteId')?.touched) {
+                <span class="error-text">Comprador é obrigatório</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h4 class="form-section-title"><i class="fa-solid fa-money-bill-wave"></i> Valores e Condições</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="label">Data do Contrato *</label>
+              <input type="date" class="input" formControlName="dataContrato"
+                [class.input-error]="form.get('dataContrato')?.invalid && form.get('dataContrato')?.touched">
+            </div>
+            
+            <div class="form-group">
+              <label class="label">Valor do Imóvel (R$) *</label>
+              <input type="number" class="input" formControlName="valorImovel" min="1" step="0.01"
+                [class.input-error]="form.get('valorImovel')?.invalid && form.get('valorImovel')?.touched">
+            </div>
+
+            <div class="form-group">
+              <label class="label">Valor de Entrada (R$) *</label>
+              <input type="number" class="input" formControlName="valorEntrada" min="0" step="0.01"
+                [class.input-error]="form.get('valorEntrada')?.invalid && form.get('valorEntrada')?.touched">
+            </div>
+            
+            <div class="form-group">
+              <label class="label">Quantidade de Parcelas *</label>
+              <input type="number" class="input" formControlName="quantidadeParcelas" min="1" max="360"
+                [class.input-error]="form.get('quantidadeParcelas')?.invalid && form.get('quantidadeParcelas')?.touched">
+            </div>
+            
+            <div class="form-group">
+              <label class="label">Dia do Vencimento *</label>
+              <input type="number" class="input" formControlName="diaVencimento" min="1" max="31"
+                [class.input-error]="form.get('diaVencimento')?.invalid && form.get('diaVencimento')?.touched">
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: flex-end; padding-bottom: 0.5rem;">
+              <label class="toggle-wrapper">
+                <span class="toggle-switch">
+                  <input type="checkbox" formControlName="aplicaIgpm">
+                  <span class="toggle-slider"></span>
+                </span>
+                <span class="toggle-label">Aplicar Reajuste IGP-M</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" (click)="fecharModal()">Cancelar</button>
+        <button class="btn btn-primary" type="button" (click)="salvar()" [disabled]="formSubmitting()">
+          @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Criando... }
+          @else { <i class="fa-solid fa-check"></i> Gerar Venda e Parcelas }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Parcelas da Venda -->
+@if (showParcelasModal() && selectedVenda()) {
+  <div class="modal-overlay" (click)="fecharModalParcelas()">
+    <div class="modal-card modal-card-xl animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <div class="modal-icon-wrapper"><i class="fa-solid fa-list-ol"></i></div>
+          <div>
+            <h3 class="modal-title">Parcelas do Financiamento</h3>
+            <p class="modal-subtitle">Imóvel: {{ selectedVenda()?.imovel?.endereco }} | Comprador: {{ selectedVenda()?.cliente?.nome }}</p>
+          </div>
+        </div>
+        <button class="btn-icon modal-close" (click)="fecharModalParcelas()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="info-alert mb-4" style="display: flex; gap: 2rem; background: var(--slate-50); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--slate-200); font-size: 0.85rem;">
+          <div><span class="text-muted">Valor Imóvel:</span> <br><strong>{{ selectedVenda()?.valorImovel | currencyBr }}</strong></div>
+          <div><span class="text-muted">Entrada:</span> <br><strong>{{ selectedVenda()?.valorEntrada | currencyBr }}</strong></div>
+          <div><span class="text-muted">Financiado:</span> <br><strong>{{ selectedVenda()?.saldoFinanciado | currencyBr }}</strong></div>
+          <div><span class="text-muted">IGP-M Base:</span> <br><strong>{{ selectedVenda()?.igpmContrato }}%</strong></div>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nº</th>
+                <th>Vencimento</th>
+                <th>Valor Base</th>
+                <th>Valor Final (c/ IGP-M)</th>
+                <th>Status</th>
+                <th>Pgto</th>
+                <th class="text-center">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (loadingParcelas()) {
+                <tr><td colspan="7" class="text-center py-4"><i class="fa-solid fa-circle-notch fa-spin text-primary"></i> Carregando...</td></tr>
+              } @else if (parcelas().length === 0) {
+                <tr><td colspan="7" class="text-center py-4 text-muted">Nenhuma parcela gerada.</td></tr>
+              } @else {
+                @for (prest of parcelas(); track prest.id) {
+                  <tr>
+                    <td><strong>{{ prest.numeroParcela }}</strong>/{{ selectedVenda()?.quantidadeParcelas }}</td>
+                    <td>{{ prest.dataVencimento | dateBr }}</td>
+                    <td>{{ prest.valorBase | currencyBr }}</td>
+                    <td><strong>{{ prest.valorFinal | currencyBr }}</strong></td>
+                    <td>
+                      <span class="badge" [ngClass]="getStatusClass(prest.status)">
+                        {{ prest.status | uppercase }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (prest.dataPagamento) {
+                        <span class="text-success" style="font-size: 0.8rem;"><i class="fa-solid fa-check"></i> {{ prest.dataPagamento | dateBr }}</span>
+                      } @else {
+                        <span class="text-muted" style="font-size: 0.8rem;">—</span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      @if (prest.status !== 'pago') {
+                        <button class="btn btn-primary btn-sm" (click)="abrirModalPagamento(prest)">
+                          Pagar
+                        </button>
+                      } @else {
+                        <span class="text-success" title="Valor Pago: {{ prest.valorPago | currencyBr }}"><i class="fa-solid fa-check-circle"></i></span>
+                      }
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" (click)="fecharModalParcelas()">Fechar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Registrar Pagamento -->
+@if (showPagarModal() && selectedParcela()) {
+  <div class="modal-overlay" style="z-index: 2050;" (click)="fecharModalPagamento()">
+    <div class="modal-card modal-card-sm animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" style="font-size: 1rem;"><i class="fa-solid fa-money-bill-wave text-primary"></i> Pagar Parcela {{ selectedParcela()?.numeroParcela }}</h3>
+        <button class="btn-icon modal-close" (click)="fecharModalPagamento()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <form [formGroup]="formPagamento" (ngSubmit)="confirmarPagamento()" class="modal-body" style="padding-top: 1rem;">
+        <div class="info-alert mb-4" style="background: var(--slate-50); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--slate-200); font-size: 0.85rem;">
+          <div><strong>Vencimento:</strong> {{ selectedParcela()?.dataVencimento | dateBr }}</div>
+          <div><strong>Valor Final Esperado:</strong> {{ selectedParcela()?.valorFinal | currencyBr }}</div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="label">Data do Pagamento *</label>
+          <input type="date" class="input" formControlName="dataPagamento">
+        </div>
+        
+        <div class="form-group mb-3">
+          <label class="label">Forma de Pagamento *</label>
+          <select class="input" formControlName="formaPagamento">
+            <option value="PIX">PIX</option>
+            <option value="BOLETO">Boleto</option>
+            <option value="TRANSFERENCIA">Transferência Bancária</option>
+            <option value="DINHEIRO">Dinheiro</option>
+          </select>
+        </div>
+        
+        <div class="form-group mb-0">
+          <label class="label">Observações (Opcional)</label>
+          <textarea class="input" formControlName="observacao" rows="2" placeholder="Ex: Pago com juros via TED"></textarea>
+        </div>
+      </form>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" (click)="fecharModalPagamento()">Cancelar</button>
+        <button class="btn btn-primary" type="button" (click)="confirmarPagamento()" [disabled]="formSubmitting()">
+          @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Registrando... }
+          @else { <i class="fa-solid fa-check"></i> Confirmar Pgto }
+        </button>
+      </div>
+    </div>
+  </div>
+}

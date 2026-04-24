@@ -1,0 +1,428 @@
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+// Left Section: Branding & Impact
+.brand-section {
+  flex: 1.2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 60px;
+  color: white;
+  overflow: hidden;
+
+  @media (max-width: 1100px) {
+    display: none;
+  }
+}
+
+.brand-image-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  .brand-background {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.05);
+    transition: transform 10s ease-in-out;
+  }
+
+  .brand-glass-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.85) 0%,
+      rgba(30, 41, 59, 0.7) 50%,
+      rgba(79, 70, 229, 0.4) 100%
+    );
+    backdrop-filter: blur(4px);
+  }
+}
+
+.brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 540px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .logo-badge {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .brand-text {
+    h1 {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      letter-spacing: -1.5px;
+
+      span {
+        background: linear-gradient(to right, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+
+    p {
+      font-size: 18px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 48px;
+    }
+  }
+}
+
+.trust-indicators {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-top: auto;
+
+  .indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .count {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .label {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+
+  .divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Right Section: Form
+.form-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: #ffffff;
+  position: relative;
+  z-index: 1;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-header {
+  margin-bottom: 40px;
+
+  h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #64748b;
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-left: 2px;
+  }
+
+  .label-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .forgot-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover { color: #4338ca; text-decoration: underline; }
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .icon-left {
+    position: absolute;
+    left: 16px;
+    color: #94a3b8;
+    font-size: 18px;
+    pointer-events: none;
+    transition: color 0.2s;
+  }
+
+  input {
+    width: 100%;
+    height: 52px;
+    padding: 0 16px 0 48px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #1e293b;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &::placeholder { color: #cbd5e1; }
+
+    &:focus {
+      outline: none;
+      background-color: #ffffff;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+
+      & ~ .icon-left { color: #4f46e5; }
+    }
+  }
+
+  &.has-error input {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+    &:focus { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+  }
+
+  .toggle-pass {
+    position: absolute;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+
+    &:hover { background: #f1f5f9; color: #64748b; }
+  }
+}
+
+.error-msg {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+.form-options {
+  .checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    user-select: none;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 18px;
+      width: 18px;
+      background-color: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      transition: all 0.2s;
+
+      &:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 6px;
+        top: 2px;
+        width: 4px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    }
+
+    &:hover input ~ .checkmark { background-color: #e2e8f0; }
+    input:checked ~ .checkmark {
+      background-color: #4f46e5;
+      border-color: #4f46e5;
+      &:after { display: block; }
+    }
+  }
+}
+
+.submit-btn {
+  width: 100%;
+  height: 54px;
+  margin-top: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover:not(:disabled) {
+    background: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+  }
+
+  &:active { transform: translateY(0); }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.loader {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.card-footer {
+  margin-top: 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+
+  p {
+    font-size: 14px;
+    color: #64748b;
+    a {
+      color: #0f172a;
+      font-weight: 700;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+  }
+}
+
+.security-badges {
+  display: flex;
+  justify-content: center;
+
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 100px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+
+    i { color: #22c55e; }
+  }
+}
+
+// Animations
+.animate-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+
+@keyframes slideUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+// Responsive
+@media (max-width: 640px) {
+  .form-section { padding: 24px; }
+  .card-header h2 { font-size: 26px; }
+}

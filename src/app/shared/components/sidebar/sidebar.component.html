@@ -1,0 +1,21 @@
+<aside class="sidebar" [class.closed]="!isOpen">
+  <div class="sidebar-content">
+    <nav class="nav-list">
+      @for (item of visibleMenuItems; track item.route) {
+        <a [routerLink]="item.route" 
+           routerLinkActive="active" 
+           class="nav-link"
+           [title]="!isOpen ? item.label : ''">
+          <div class="link-icon">
+            <i [class]="item.icon"></i>
+          </div>
+          <span class="link-text">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  </div>
+
+  <div class="sidebar-footer">
+    <span class="version text-xs text-slate-500" *ngIf="isOpen">v1.0.0</span>
+  </div>
+</aside>

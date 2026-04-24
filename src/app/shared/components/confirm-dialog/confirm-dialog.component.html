@@ -1,0 +1,23 @@
+<div class="dialog-overlay" *ngIf="visible">
+  <div class="dialog-card shadow-lg animate-fade-in">
+    <div class="dialog-header">
+      <h3 class="m-0">{{ data.title }}</h3>
+      <button class="btn-icon" (click)="onCancel()" title="Fechar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="dialog-body">
+      <p class="text-slate-600 m-0">{{ data.message }}</p>
+    </div>
+
+    <div class="dialog-footer">
+      <button class="btn btn-secondary" (click)="onCancel()">
+        {{ data.cancelText || 'Cancelar' }}
+      </button>
+      <button class="btn btn-danger" (click)="onConfirm()">
+        {{ data.confirmText || 'Confirmar' }}
+      </button>
+    </div>
+  </div>
+</div>

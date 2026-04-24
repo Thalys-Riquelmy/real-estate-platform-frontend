@@ -1,0 +1,13 @@
+<div class="app-layout">
+  <app-header (menuClick)="toggleSidebar()"></app-header>
+  
+  <div class="layout-body">
+    <app-sidebar [isOpen]="isSidebarOpen()"></app-sidebar>
+    
+    <main class="main-content">
+      <div class="container-fluid">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

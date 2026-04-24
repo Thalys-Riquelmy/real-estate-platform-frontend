@@ -1,0 +1,104 @@
+<div class="auth-container">
+  <!-- Left Side: Immersive Branding -->
+  <div class="brand-section">
+    <div class="brand-image-wrapper">
+      <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop" 
+           alt="Modern Real Estate" class="brand-background">
+      <div class="brand-glass-overlay"></div>
+    </div>
+    
+    <div class="brand-content">
+      <div class="logo-badge">
+        <i class="fa-solid fa-house-chimney-window"></i>
+      </div>
+      <div class="brand-text">
+        <h1 class="animate-up">Inovação em <br><span>Gestão Imobiliária</span></h1>
+        <p class="animate-up delay-1">Transforme sua produtividade com a plataforma líder em inteligência para o mercado imobiliário.</p>
+      </div>
+      
+      <div class="trust-indicators animate-up delay-2">
+        <div class="indicator">
+          <span class="count">15k+</span>
+          <span class="label">Usuários Ativos</span>
+        </div>
+        <div class="divider"></div>
+        <div class="indicator">
+          <span class="count">99.9%</span>
+          <span class="label">Uptime Garantido</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Professional Login Form -->
+  <div class="form-section">
+    <div class="login-card">
+      <header class="card-header">
+        <h2>Bem-vindo de volta</h2>
+        <p>Acesse sua conta para gerenciar seus negócios.</p>
+      </header>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="input-group">
+          <label for="email">E-mail Profissional</label>
+          <div class="input-wrapper" [class.has-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            <i class="fa-solid fa-envelope icon-left"></i>
+            <input type="email" id="email" formControlName="email" placeholder="exemplo@empresa.com.br">
+          </div>
+          @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
+            <span class="error-msg">O e-mail é obrigatório</span>
+          }
+          @if (loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched) {
+            <span class="error-msg">Insira um e-mail válido</span>
+          }
+        </div>
+
+        <div class="input-group">
+          <div class="label-flex">
+            <label for="senha">Senha de Acesso</label>
+            <a href="javascript:void(0)" class="forgot-link">Esqueceu a senha?</a>
+          </div>
+          <div class="input-wrapper" [class.has-error]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched">
+            <i class="fa-solid fa-shield-halved icon-left"></i>
+            <input [type]="showPassword() ? 'text' : 'password'" id="senha" formControlName="senha" placeholder="••••••••">
+            <button type="button" class="toggle-pass" (click)="togglePassword()" [title]="showPassword() ? 'Ocultar' : 'Mostrar'">
+              <i class="fa-solid" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()"></i>
+            </button>
+          </div>
+          @if (loginForm.get('senha')?.hasError('required') && loginForm.get('senha')?.touched) {
+            <span class="error-msg">A senha é obrigatória</span>
+          }
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="rememberMe">
+            <span class="checkmark"></span>
+            Lembrar-me neste dispositivo
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loading()">
+          @if (loading()) {
+            <span class="loader"></span>
+            Aguarde...
+          } @else {
+            Acessar Sistema
+            <i class="fa-solid fa-arrow-right"></i>
+          }
+        </button>
+      </form>
+
+      <footer class="card-footer">
+        <p>Ainda não tem acesso? <a href="javascript:void(0)">Solicitar Demonstração</a></p>
+        
+        <div class="security-badges">
+          <div class="badge">
+            <i class="fa-solid fa-lock"></i>
+            <span>Criptografia SSL 256-bit</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>
