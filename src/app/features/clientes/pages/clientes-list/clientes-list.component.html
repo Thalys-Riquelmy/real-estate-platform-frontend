@@ -43,7 +43,7 @@
 <div class="filters-bar card">
   <div class="search-box">
     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-    <input type="text" class="input search-input" placeholder="Buscar por nome, CPF/CNPJ ou e-mail..."
+    <input type="text" class="input search-input" placeholder="Buscar por nome, CPF/CNPJ, cidade ou bairro..."
       [value]="searchTerm()" (input)="onSearchChange($event)">
   </div>
   <div class="filter-group">
@@ -77,6 +77,7 @@
             <th>Cliente</th>
             <th>CPF/CNPJ</th>
             <th>Contato</th>
+            <th>Endereço</th>
             <th>Tipo</th>
             <th class="text-center">Ações</th>
           </tr>
@@ -99,10 +100,18 @@
                   @if (item.telefone) {
                     <span class="contact-item"><i class="fa-solid fa-phone contact-icon"></i> {{ item.telefone | telefone }}</span>
                   }
-                  @if (item.endereco) {
-                    <span class="contact-item contact-address"><i class="fa-solid fa-location-dot contact-icon"></i> {{ item.endereco }}</span>
+                  @if (!item.telefone) { <span class="text-muted">—</span> }
+                </div>
+              </td>
+              <td>
+                <div class="contact-cell">
+                  @if (item.endereco || item.cidade) {
+                    <span class="contact-item contact-address">
+                      <i class="fa-solid fa-location-dot contact-icon"></i> 
+                      {{ getEnderecoCompleto(item) }}
+                    </span>
                   }
-                  @if (!item.telefone && !item.endereco) { <span class="text-muted">—</span> }
+                  @if (!item.endereco && !item.cidade) { <span class="text-muted">—</span> }
                 </div>
               </td>
               <td>
@@ -183,12 +192,48 @@
                 <span class="error-text">E-mail inválido</span>
               }
             </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h4 class="form-section-title"><i class="fa-solid fa-location-dot"></i> Endereço</h4>
+          <div class="form-grid">
             <div class="form-group form-full">
-              <label class="label"><i class="fa-solid fa-location-dot form-label-icon"></i> Endereço</label>
-              <input type="text" class="input" formControlName="endereco" placeholder="Rua, número, bairro, cidade - UF">
+              <label class="label"><i class="fa-solid fa-road form-label-icon"></i> Logradouro</label>
+              <input type="text" class="input" formControlName="endereco" placeholder="Ex: Rua das Flores">
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-hashtag form-label-icon"></i> Número</label>
+              <input type="text" class="input" formControlName="numero" placeholder="123">
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-building form-label-icon"></i> Complemento</label>
+              <input type="text" class="input" formControlName="complemento" placeholder="Apto 45, Bloco B">
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-map-pin form-label-icon"></i> Bairro</label>
+              <input type="text" class="input" formControlName="bairro" placeholder="Centro">
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-mailbox form-label-icon"></i> CEP</label>
+              <input type="text" class="input" formControlName="cep" maskCep placeholder="00000-000">
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-city form-label-icon"></i> Cidade</label>
+              <input type="text" class="input" formControlName="cidade" placeholder="São Paulo">
+            </div>
+            <div class="form-group">
+              <label class="label"><i class="fa-solid fa-flag form-label-icon"></i> Estado (UF)</label>
+              <select class="input" formControlName="estado">
+                <option value="">Selecione o estado</option>
+                @for (estado of estadoOpcoes; track estado.value) {
+                  <option [value]="estado.value">{{ estado.label }} ({{ estado.value }})</option>
+                }
+              </select>
             </div>
           </div>
         </div>
+
         <div class="form-section">
           <h4 class="form-section-title"><i class="fa-solid fa-note-sticky"></i> Informações Adicionais</h4>
           <div class="form-grid">

@@ -7,11 +7,13 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CpfCnpjPipe } from '../../../../shared/pipes/cpf-cnpj.pipe';
 import { TelefonePipe } from '../../../../shared/pipes/telefone.pipe';
+import { CepPipe } from '../../../../shared/pipes/cep.pipe';
 import { MaskCpfCnpjDirective } from '../../../../shared/directives/mask-cpf-cnpj.directive';
 import { MaskTelefoneDirective } from '../../../../shared/directives/mask-telefone.directive';
+import { MaskCepDirective } from '../../../../shared/directives/mask-cep.directive';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { ClienteResponse, ClienteRequest, TIPO_CLIENTE_OPTIONS } from '../../../../core/models/cliente.model';
+import { ClienteResponse, ClienteRequest, TIPO_CLIENTE_OPTIONS, ESTADO_OPTIONS } from '../../../../core/models/cliente.model';
 
 @Component({
   selector: 'app-clientes-list',
@@ -19,7 +21,8 @@ import { ClienteResponse, ClienteRequest, TIPO_CLIENTE_OPTIONS } from '../../../
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     PageHeaderComponent, LoadingComponent, EmptyStateComponent, ConfirmDialogComponent,
-    CpfCnpjPipe, TelefonePipe, MaskCpfCnpjDirective, MaskTelefoneDirective
+    CpfCnpjPipe, TelefonePipe, CepPipe,
+    MaskCpfCnpjDirective, MaskTelefoneDirective, MaskCepDirective
   ],
   templateUrl: './clientes-list.component.html',
   styleUrls: ['./clientes-list.component.scss']
@@ -30,6 +33,7 @@ export class ClientesListComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   readonly tiposOpcoes = TIPO_CLIENTE_OPTIONS;
+  readonly estadoOpcoes = ESTADO_OPTIONS;
 
   clientes = signal<ClienteResponse[]>([]);
   loading = signal(false);
@@ -55,7 +59,9 @@ export class ClientesListComponent implements OnInit {
       result = result.filter(c =>
         c.nome.toLowerCase().includes(search) ||
         c.cpfCnpj.includes(search) ||
-        (c.email && c.email.toLowerCase().includes(search))
+        c.email?.toLowerCase().includes(search) ||
+        c.cidade?.toLowerCase().includes(search) ||
+        c.bairro?.toLowerCase().includes(search)
       );
     }
     if (tipo) {
@@ -82,7 +88,13 @@ export class ClientesListComponent implements OnInit {
       tipo: ['comprador', Validators.required],
       telefone: ['', Validators.maxLength(20)],
       email: ['', [Validators.email, Validators.maxLength(100)]],
-      endereco: [''],
+      endereco: ['', Validators.maxLength(150)],
+      numero: ['', Validators.maxLength(10)],
+      complemento: ['', Validators.maxLength(100)],
+      bairro: ['', Validators.maxLength(100)],
+      cep: ['', Validators.maxLength(20)],
+      cidade: ['', Validators.maxLength(100)],
+      estado: ['', Validators.maxLength(2)],
       observacoes: ['']
     });
   }
@@ -104,7 +116,10 @@ export class ClientesListComponent implements OnInit {
 
   abrirModalNovo(): void {
     this.editingItem.set(null);
-    this.form.reset({ tipo: 'comprador' });
+    this.form.reset({ 
+      tipo: 'comprador',
+      estado: ''
+    });
     this.showFormModal.set(true);
   }
 
@@ -117,6 +132,12 @@ export class ClientesListComponent implements OnInit {
       telefone: item.telefone,
       email: item.email,
       endereco: item.endereco,
+      numero: item.numero,
+      complemento: item.complemento,
+      bairro: item.bairro,
+      cep: item.cep,
+      cidade: item.cidade,
+      estado: item.estado,
       observacoes: item.observacoes
     });
     this.showFormModal.set(true);
@@ -125,7 +146,7 @@ export class ClientesListComponent implements OnInit {
   fecharModal(): void {
     this.showFormModal.set(false);
     this.editingItem.set(null);
-    this.form.reset({ tipo: 'comprador' });
+    this.form.reset({ tipo: 'comprador', estado: '' });
   }
 
   salvar(): void {
@@ -219,5 +240,19 @@ export class ClientesListComponent implements OnInit {
   getInitials(nome: string): string {
     if (!nome) return '';
     return nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+  }
+
+  // Método para formatar o endereço completo para exibição
+  getEnderecoCompleto(item: ClienteResponse): string {
+    const partes = [];
+    if (item.endereco) partes.push(item.endereco);
+    if (item.numero) partes.push(item.numero);
+    if (item.complemento) partes.push(item.complemento);
+    if (item.bairro) partes.push(item.bairro);
+    if (item.cidade) partes.push(item.cidade);
+    if (item.estado) partes.push(item.estado);
+    if (item.cep) partes.push(`CEP: ${item.cep}`);
+    
+    return partes.join(', ') || '—';
   }
 }
