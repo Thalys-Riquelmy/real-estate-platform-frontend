@@ -9,9 +9,11 @@ import { CpfCnpjPipe } from '../../../../shared/pipes/cpf-cnpj.pipe';
 import { TelefonePipe } from '../../../../shared/pipes/telefone.pipe';
 import { MaskCpfCnpjDirective } from '../../../../shared/directives/mask-cpf-cnpj.directive';
 import { MaskTelefoneDirective } from '../../../../shared/directives/mask-telefone.directive';
+import { MaskCepDirective } from '../../../../shared/directives/mask-cep.directive';
 import { ProprietarioService } from '../../../../core/services/proprietario.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ProprietarioResponse, ProprietarioRequest } from '../../../../core/models/proprietario.model';
+import { ESTADO_OPTIONS } from '../../../../core/models/estado.model';
 
 @Component({
   selector: 'app-proprietarios-list',
@@ -19,7 +21,8 @@ import { ProprietarioResponse, ProprietarioRequest } from '../../../../core/mode
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     PageHeaderComponent, LoadingComponent, EmptyStateComponent, ConfirmDialogComponent,
-    CpfCnpjPipe, TelefonePipe, MaskCpfCnpjDirective, MaskTelefoneDirective
+    CpfCnpjPipe, TelefonePipe,
+    MaskCpfCnpjDirective, MaskTelefoneDirective, MaskCepDirective
   ],
   templateUrl: './proprietarios-list.component.html',
   styleUrls: ['./proprietarios-list.component.scss']
@@ -28,6 +31,8 @@ export class ProprietariosListComponent implements OnInit {
   private service = inject(ProprietarioService);
   private notification = inject(NotificationService);
   private fb = inject(FormBuilder);
+
+  readonly estadoOpcoes = ESTADO_OPTIONS;
 
   proprietarios = signal<ProprietarioResponse[]>([]);
   loading = signal(false);
@@ -53,7 +58,9 @@ export class ProprietariosListComponent implements OnInit {
       result = result.filter(p =>
         p.nome.toLowerCase().includes(search) ||
         p.cpfCnpj.includes(search) ||
-        (p.email && p.email.toLowerCase().includes(search))
+        (p.email && p.email.toLowerCase().includes(search)) ||
+        (p.cidade && p.cidade.toLowerCase().includes(search)) ||
+        (p.bairro && p.bairro.toLowerCase().includes(search))
       );
     }
     if (status === 'ativo') result = result.filter(p => p.ativo);
@@ -77,10 +84,16 @@ export class ProprietariosListComponent implements OnInit {
       cpfCnpj: ['', [Validators.required, Validators.maxLength(20)]],
       telefone: ['', Validators.maxLength(20)],
       email: ['', [Validators.email, Validators.maxLength(100)]],
-      endereco: [''],
-      banco: [''],
-      agencia: [''],
-      conta: ['']
+      endereco: ['', Validators.maxLength(150)],
+      numero: ['', Validators.maxLength(10)],
+      complemento: ['', Validators.maxLength(100)],
+      bairro: ['', Validators.maxLength(100)],
+      cep: ['', Validators.maxLength(20)],
+      cidade: ['', Validators.maxLength(100)],
+      estado: ['', Validators.maxLength(2)],
+      banco: ['', Validators.maxLength(50)],
+      agencia: ['', Validators.maxLength(20)],
+      conta: ['', Validators.maxLength(20)]
     });
   }
 
@@ -101,7 +114,9 @@ export class ProprietariosListComponent implements OnInit {
 
   abrirModalNovo(): void {
     this.editingItem.set(null);
-    this.form.reset();
+    this.form.reset({
+      estado: ''
+    });
     this.showFormModal.set(true);
   }
 
@@ -113,6 +128,12 @@ export class ProprietariosListComponent implements OnInit {
       telefone: item.telefone,
       email: item.email,
       endereco: item.endereco,
+      numero: item.numero,
+      complemento: item.complemento,
+      bairro: item.bairro,
+      cep: item.cep,
+      cidade: item.cidade,
+      estado: item.estado,
       banco: item.banco,
       agencia: item.agencia,
       conta: item.conta
@@ -123,7 +144,7 @@ export class ProprietariosListComponent implements OnInit {
   fecharModal(): void {
     this.showFormModal.set(false);
     this.editingItem.set(null);
-    this.form.reset();
+    this.form.reset({ estado: '' });
   }
 
   salvar(): void {
@@ -192,6 +213,12 @@ export class ProprietariosListComponent implements OnInit {
       telefone: item.telefone,
       email: item.email,
       endereco: item.endereco,
+      numero: item.numero,
+      complemento: item.complemento,
+      bairro: item.bairro,
+      cep: item.cep,
+      cidade: item.cidade,
+      estado: item.estado,
       banco: item.banco,
       agencia: item.agencia,
       conta: item.conta
@@ -230,15 +257,22 @@ export class ProprietariosListComponent implements OnInit {
     return ativo ? 'badge-ativo' : 'badge-inativo';
   }
 
-  formatDate(date: string): string {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit', month: '2-digit', year: 'numeric'
-    });
-  }
-
   getInitials(nome: string): string {
     if (!nome) return '';
     return nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+  }
+
+  // Método para formatar o endereço completo para exibição
+  getEnderecoCompleto(item: ProprietarioResponse): string {
+    const partes = [];
+    if (item.endereco) partes.push(item.endereco);
+    if (item.numero) partes.push(item.numero);
+    if (item.complemento) partes.push(item.complemento);
+    if (item.bairro) partes.push(item.bairro);
+    if (item.cidade) partes.push(item.cidade);
+    if (item.estado) partes.push(item.estado);
+    if (item.cep) partes.push(`CEP: ${item.cep}`);
+    
+    return partes.join(', ') || '—';
   }
 }
