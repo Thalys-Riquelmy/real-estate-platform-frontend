@@ -7,6 +7,12 @@ export interface ProprietarioResponse {
   telefone: string;
   email: string;
   endereco: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cep: string;
+  cidade: string;
+  estado: string;
   banco: string;
   agencia: string;
   conta: string;
@@ -22,6 +28,12 @@ export interface ProprietarioRequest {
   telefone?: string;
   email?: string;
   endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cep?: string;
+  cidade?: string;
+  estado?: string;
   banco?: string;
   agencia?: string;
   conta?: string;
