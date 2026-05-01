@@ -11,6 +11,7 @@ import { ProprietarioService } from '../../../../core/services/proprietario.serv
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ImovelResponse, ImovelRequest, TIPO_IMOVEL_OPTIONS, STATUS_IMOVEL_OPTIONS, ESTADOS_BR } from '../../../../core/models/imovel.model';
 import { ProprietarioResponse } from '../../../../core/models/proprietario.model';
+import { CpfCnpjPipe } from 'src/app/shared';
 
 @Component({
   selector: 'app-imoveis-list',
@@ -18,7 +19,7 @@ import { ProprietarioResponse } from '../../../../core/models/proprietario.model
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     PageHeaderComponent, LoadingComponent, EmptyStateComponent, ConfirmDialogComponent,
-    CurrencyBrPipe
+    CurrencyBrPipe, CpfCnpjPipe
   ],
   templateUrl: './imoveis-list.component.html',
   styleUrls: ['./imoveis-list.component.scss']

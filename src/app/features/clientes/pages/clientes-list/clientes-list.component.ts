@@ -7,13 +7,13 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CpfCnpjPipe } from '../../../../shared/pipes/cpf-cnpj.pipe';
 import { TelefonePipe } from '../../../../shared/pipes/telefone.pipe';
-import { CepPipe } from '../../../../shared/pipes/cep.pipe';
 import { MaskCpfCnpjDirective } from '../../../../shared/directives/mask-cpf-cnpj.directive';
 import { MaskTelefoneDirective } from '../../../../shared/directives/mask-telefone.directive';
 import { MaskCepDirective } from '../../../../shared/directives/mask-cep.directive';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { ClienteResponse, ClienteRequest, TIPO_CLIENTE_OPTIONS, ESTADO_OPTIONS } from '../../../../core/models/cliente.model';
+import { ClienteResponse, ClienteRequest, TIPO_CLIENTE_OPTIONS } from '../../../../core/models/cliente.model';
+import { ESTADO_OPTIONS } from '../../../../core/models/estado.model';
 
 @Component({
   selector: 'app-clientes-list',
@@ -21,7 +21,7 @@ import { ClienteResponse, ClienteRequest, TIPO_CLIENTE_OPTIONS, ESTADO_OPTIONS }
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     PageHeaderComponent, LoadingComponent, EmptyStateComponent, ConfirmDialogComponent,
-    CpfCnpjPipe, TelefonePipe, CepPipe,
+    CpfCnpjPipe, TelefonePipe, 
     MaskCpfCnpjDirective, MaskTelefoneDirective, MaskCepDirective
   ],
   templateUrl: './clientes-list.component.html',
