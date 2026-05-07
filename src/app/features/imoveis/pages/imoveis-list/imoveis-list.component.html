@@ -1,37 +1,45 @@
 <!-- Page Header -->
-<app-page-header
-  title="Gestão de Imóveis"
+<app-page-header 
+  title="Gestão de Imóveis" 
   subtitle="Catálogo de imóveis disponíveis para venda e locação"
-  buttonText="Novo Imóvel"
-  buttonIcon="fa-solid fa-house-medical"
+  buttonText="Novo Imóvel" 
+  buttonIcon="fa-solid fa-house-medical" 
   (buttonClick)="abrirModalNovo()">
 </app-page-header>
 
 <!-- Stats Cards -->
 <div class="stats-grid">
   <div class="stat-card">
-    <div class="stat-icon stat-icon-total"><i class="fa-solid fa-building"></i></div>
+    <div class="stat-icon stat-icon-total">
+      <i class="fa-solid fa-building"></i>
+    </div>
     <div class="stat-info">
       <span class="stat-value">{{ totalItems() }}</span>
       <span class="stat-label">Total de Imóveis</span>
     </div>
   </div>
   <div class="stat-card">
-    <div class="stat-icon stat-icon-disponivel"><i class="fa-solid fa-check"></i></div>
+    <div class="stat-icon stat-icon-disponivel">
+      <i class="fa-solid fa-check"></i>
+    </div>
     <div class="stat-info">
       <span class="stat-value">{{ totalDisponiveis() }}</span>
       <span class="stat-label">Disponíveis</span>
     </div>
   </div>
   <div class="stat-card">
-    <div class="stat-icon stat-icon-alugado"><i class="fa-solid fa-key"></i></div>
+    <div class="stat-icon stat-icon-alugado">
+      <i class="fa-solid fa-key"></i>
+    </div>
     <div class="stat-info">
       <span class="stat-value">{{ totalAlugados() }}</span>
       <span class="stat-label">Alugados</span>
     </div>
   </div>
   <div class="stat-card">
-    <div class="stat-icon stat-icon-vendido"><i class="fa-solid fa-handshake"></i></div>
+    <div class="stat-icon stat-icon-vendido">
+      <i class="fa-solid fa-handshake"></i>
+    </div>
     <div class="stat-info">
       <span class="stat-value">{{ totalVendidos() }}</span>
       <span class="stat-label">Vendidos</span>
@@ -43,8 +51,12 @@
 <div class="filters-bar card">
   <div class="search-box">
     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-    <input type="text" class="input search-input" placeholder="Buscar por endereço, bairro ou cidade..."
-      [value]="searchTerm()" (input)="onSearchChange($event)">
+    <input 
+      type="text" 
+      class="input search-input" 
+      placeholder="Buscar por endereço, bairro ou cidade..."
+      [value]="searchTerm()" 
+      (input)="onSearchChange($event)">
   </div>
   <div class="filter-group">
     <select class="input filter-select" [value]="filterTipo()" (change)="onFilterTipoChange($event)">
@@ -66,11 +78,13 @@
 </div>
 
 <!-- Content -->
-<div class="content-area" style="position: relative;">
+<div class="content-area">
   <app-loading [visible]="loading()" message="Carregando imóveis..."></app-loading>
 
   @if (!loading() && filteredItems().length === 0) {
-    <app-empty-state icon="fa-solid fa-house-circle-xmark" title="Nenhum imóvel encontrado"
+    <app-empty-state 
+      icon="fa-solid fa-house-circle-xmark" 
+      title="Nenhum imóvel encontrado"
       [message]="searchTerm() || filterTipo() || filterStatus() ? 'Tente ajustar os filtros de busca.' : 'Adicione seu primeiro imóvel clicando no botão acima.'">
     </app-empty-state>
   }
@@ -92,29 +106,45 @@
             <tr class="table-row-animate">
               <td>
                 <div class="imovel-cell">
-                  <div class="imovel-icon"><i [class]="item.tipo === 'apartamento' ? 'fa-regular fa-building' : 'fa-solid fa-house'"></i></div>
+                  <div class="imovel-icon">
+                    <i [class]="item.tipo === 'apartamento' ? 'fa-regular fa-building' : 'fa-solid fa-house'"></i>
+                  </div>
                   <div class="imovel-info">
                     <span class="imovel-title">{{ item.endereco }}, {{ item.numero || 'S/N' }}</span>
                     <span class="imovel-subtitle">{{ item.bairro }} • {{ item.cidade }}/{{ item.estado }}</span>
-                    <span class="text-muted"><i class="fa-solid fa-user-tie"></i> Prop: {{ item.proprietario?.nome || '—' }}</span>
+                    <span class="text-muted">
+                      <i class="fa-solid fa-user-tie"></i> Prop: {{ item.proprietario?.nome || '—' }}
+                    </span>
                   </div>
                 </div>
               </td>
               <td>
                 <div class="features-cell">
-                  <span class="feature-item" title="Quartos"><i class="fa-solid fa-bed"></i> {{ item.quartos }}</span>
-                  <span class="feature-item" title="Banheiros"><i class="fa-solid fa-shower"></i> {{ item.banheiros }}</span>
-                  <span class="feature-item" title="Vagas"><i class="fa-solid fa-car"></i> {{ item.vagas }}</span>
-                  <span class="feature-item" title="Área Const."><i class="fa-solid fa-ruler-combined"></i> {{ item.areaConstruida }}m²</span>
+                  <span class="feature-item" title="Quartos">
+                    <i class="fa-solid fa-bed"></i> {{ item.quartos }}
+                  </span>
+                  <span class="feature-item" title="Banheiros">
+                    <i class="fa-solid fa-shower"></i> {{ item.banheiros }}
+                  </span>
+                  <span class="feature-item" title="Vagas">
+                    <i class="fa-solid fa-car"></i> {{ item.vagas }}
+                  </span>
+                  <span class="feature-item" title="Área Const.">
+                    <i class="fa-solid fa-ruler-combined"></i> {{ item.areaConstruida }}m²
+                  </span>
                 </div>
               </td>
               <td>
                 <div class="valores-cell">
                   @if (item.valorVenda > 0) {
-                    <span class="valor-item valor-venda"><span class="valor-label">Venda:</span> {{ item.valorVenda | currencyBr }}</span>
+                    <span class="valor-item valor-venda">
+                      <span class="valor-label">Venda:</span> {{ item.valorVenda | currencyBr }}
+                    </span>
                   }
                   @if (item.valorAluguel > 0) {
-                    <span class="valor-item valor-aluguel"><span class="valor-label">Alug:</span> {{ item.valorAluguel | currencyBr }}</span>
+                    <span class="valor-item valor-aluguel">
+                      <span class="valor-label">Alug:</span> {{ item.valorAluguel | currencyBr }}
+                    </span>
                   }
                   @if (!item.valorVenda && !item.valorAluguel) {
                     <span class="text-muted">A combinar</span>
@@ -125,21 +155,31 @@
                 <span class="badge" [ngClass]="getStatusClass(item.status)">
                   {{ getStatusLabel(item.status) }}
                 </span>
-                <!-- Quick Status Change Dropdown (Simulated with simple buttons for now) -->
                 <div class="status-quick-actions" style="margin-top: 0.25rem;">
-                   <select class="input" style="padding: 0.2rem; font-size: 0.7rem; height: auto;" 
-                          (change)="mudarStatusRapido(item, $any($event.target).value)">
-                     <option value="">Alterar...</option>
-                     @for (opcao of statusOpcoes; track opcao.value) {
-                       <option [value]="opcao.value" [disabled]="item.status === opcao.value">{{ opcao.label }}</option>
-                     }
-                   </select>
+                  <select 
+                    class="input" 
+                    style="padding: 0.2rem; font-size: 0.7rem; height: auto;"
+                    (change)="mudarStatusRapido(item, $any($event.target).value)">
+                    <option value="">Alterar...</option>
+                    @for (opcao of statusOpcoes; track opcao.value) {
+                      <option [value]="opcao.value" [disabled]="item.status === opcao.value">
+                        {{ opcao.label }}
+                      </option>
+                    }
+                  </select>
                 </div>
               </td>
               <td>
                 <div class="actions-cell">
-                  <button class="btn-action btn-action-edit" (click)="abrirModalEditar(item)" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                  <button class="btn-action btn-action-deactivate" (click)="confirmarExclusao(item)" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>
+                  <button class="btn-action btn-action-images" (click)="abrirModalImagens(item)" title="Gerenciar imagens">
+                    <i class="fa-solid fa-images"></i>
+                  </button>
+                  <button class="btn-action btn-action-edit" (click)="abrirModalEditar(item)" title="Editar">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button class="btn-action btn-action-deactivate" (click)="confirmarExclusao(item)" title="Excluir">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -148,7 +188,9 @@
       </table>
     </div>
     <div class="table-footer">
-      <span class="results-count">Exibindo <strong>{{ filteredItems().length }}</strong> de <strong>{{ totalItems() }}</strong> imóvel(is)</span>
+      <span class="results-count">
+        Exibindo <strong>{{ filteredItems().length }}</strong> de <strong>{{ totalItems() }}</strong> imóvel(is)
+      </span>
     </div>
   }
 </div>
@@ -159,22 +201,28 @@
     <div class="modal-card modal-card-xl animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-header-content">
-          <div class="modal-icon-wrapper"><i class="fa-solid fa-house-chimney"></i></div>
+          <div class="modal-icon-wrapper">
+            <i class="fa-solid fa-house-chimney"></i>
+          </div>
           <div>
             <h3 class="modal-title">{{ editingItem() ? 'Editar Imóvel' : 'Novo Imóvel' }}</h3>
             <p class="modal-subtitle">{{ editingItem() ? 'Atualize as informações' : 'Preencha os dados do imóvel' }}</p>
           </div>
         </div>
-        <button class="btn-icon modal-close" (click)="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+        <button class="btn-icon modal-close" (click)="fecharModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
+      
       <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
-        
+        <!-- Informações Básicas -->
         <div class="form-section">
           <h4 class="form-section-title"><i class="fa-solid fa-list"></i> Informações Básicas</h4>
           <div class="form-grid">
             <div class="form-group form-full">
               <label class="label"><i class="fa-solid fa-user-tie form-label-icon"></i> Proprietário *</label>
-              <select class="input" formControlName="proprietarioId" [class.input-error]="form.get('proprietarioId')?.invalid && form.get('proprietarioId')?.touched">
+              <select class="input" formControlName="proprietarioId"
+                [class.input-error]="form.get('proprietarioId')?.invalid && form.get('proprietarioId')?.touched">
                 <option [ngValue]="null">Selecione um proprietário</option>
                 @for (prop of proprietarios(); track prop.id) {
                   <option [ngValue]="prop.id">{{ prop.nome }} ({{ prop.cpfCnpj | cpfCnpj }})</option>
@@ -184,7 +232,7 @@
                 <span class="error-text">Proprietário é obrigatório</span>
               }
             </div>
-            
+
             <div class="form-group">
               <label class="label"><i class="fa-solid fa-tag form-label-icon"></i> Tipo de Imóvel *</label>
               <select class="input" formControlName="tipo">
@@ -193,7 +241,7 @@
                 }
               </select>
             </div>
-            
+
             <div class="form-group">
               <label class="label"><i class="fa-solid fa-circle-info form-label-icon"></i> Status *</label>
               <select class="input" formControlName="status">
@@ -205,6 +253,7 @@
           </div>
         </div>
 
+        <!-- Localização -->
         <div class="form-section">
           <h4 class="form-section-title"><i class="fa-solid fa-location-dot"></i> Localização</h4>
           <div class="form-grid">
@@ -213,32 +262,32 @@
               <input type="text" class="input" formControlName="endereco" placeholder="Ex: Av. Paulista"
                 [class.input-error]="form.get('endereco')?.invalid && form.get('endereco')?.touched">
             </div>
-            
+
             <div class="form-group">
               <label class="label">Número</label>
               <input type="text" class="input" formControlName="numero" placeholder="Ex: 1000">
             </div>
-            
+
             <div class="form-group">
               <label class="label">Complemento</label>
               <input type="text" class="input" formControlName="complemento" placeholder="Ex: Apto 123, Bloco B">
             </div>
-            
+
             <div class="form-group">
               <label class="label">Bairro</label>
               <input type="text" class="input" formControlName="bairro" placeholder="Ex: Bela Vista">
             </div>
-            
+
             <div class="form-group">
               <label class="label">CEP</label>
               <input type="text" class="input" formControlName="cep" placeholder="00000-000">
             </div>
-            
+
             <div class="form-group">
               <label class="label">Cidade</label>
               <input type="text" class="input" formControlName="cidade" placeholder="Ex: São Paulo">
             </div>
-            
+
             <div class="form-group">
               <label class="label">Estado</label>
               <select class="input" formControlName="estado">
@@ -250,36 +299,38 @@
           </div>
         </div>
 
+        <!-- Características -->
         <div class="form-section">
           <h4 class="form-section-title"><i class="fa-solid fa-ruler-combined"></i> Características</h4>
           <div class="form-grid">
             <div class="form-group">
-              <label class="label"><i class="fa-solid fa-maximize form-label-icon"></i> Área Terreno (m²)</label>
+              <label class="label">Área Terreno (m²)</label>
               <input type="number" class="input" formControlName="areaTerreno" min="0">
             </div>
             <div class="form-group">
-              <label class="label"><i class="fa-solid fa-ruler-combined form-label-icon"></i> Área Construída (m²)</label>
+              <label class="label">Área Construída (m²)</label>
               <input type="number" class="input" formControlName="areaConstruida" min="0">
             </div>
             <div class="form-group">
-              <label class="label"><i class="fa-solid fa-bed form-label-icon"></i> Quartos</label>
+              <label class="label">Quartos</label>
               <input type="number" class="input" formControlName="quartos" min="0">
             </div>
             <div class="form-group">
-              <label class="label"><i class="fa-solid fa-shower form-label-icon"></i> Banheiros</label>
+              <label class="label">Banheiros</label>
               <input type="number" class="input" formControlName="banheiros" min="0">
             </div>
             <div class="form-group">
-              <label class="label"><i class="fa-solid fa-car form-label-icon"></i> Vagas Garagem</label>
+              <label class="label">Vagas Garagem</label>
               <input type="number" class="input" formControlName="vagas" min="0">
             </div>
             <div class="form-group">
-              <label class="label"><i class="fa-solid fa-stairs form-label-icon"></i> Andar</label>
+              <label class="label">Andar</label>
               <input type="number" class="input" formControlName="andar" min="0">
             </div>
           </div>
         </div>
-        
+
+        <!-- Valores -->
         <div class="form-section">
           <h4 class="form-section-title"><i class="fa-solid fa-money-bill-wave"></i> Valores</h4>
           <div class="form-grid">
@@ -294,6 +345,38 @@
           </div>
         </div>
 
+        <!-- Imagens -->
+        <div class="form-section">
+          <h4 class="form-section-title"><i class="fa-solid fa-image"></i> Imagens do Imóvel</h4>
+
+          @if (imagensPreview().length > 0) {
+            <div class="preview-grid">
+              @for (preview of imagensPreview(); track $index) {
+                <div class="preview-item">
+                  <img [src]="preview" alt="Preview">
+                  <button type="button" class="btn-remove-preview" (click)="removerPreview($index)">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="upload-area" (click)="fileInput.click()">
+            <i class="fa-solid fa-cloud-upload-alt"></i>
+            <span>Clique para selecionar imagens</span>
+            <small>Formatos: JPG, PNG, WEBP (Máx: 5MB cada)</small>
+            <input 
+              type="file" 
+              #fileInput 
+              multiple 
+              accept="image/jpeg,image/png,image/webp" 
+              style="display: none"
+              (change)="onImagensSelecionadas($event)">
+          </div>
+        </div>
+
+        <!-- Mais Informações -->
         <div class="form-section">
           <h4 class="form-section-title"><i class="fa-solid fa-note-sticky"></i> Mais Informações</h4>
           <div class="form-grid">
@@ -303,28 +386,116 @@
                   <input type="checkbox" formControlName="destaque">
                   <span class="toggle-slider"></span>
                 </span>
-                <span class="toggle-label"><i class="fa-solid fa-star" style="color: #f59e0b;"></i> Destacar imóvel no site/vitrine</span>
+                <span class="toggle-label">
+                  <i class="fa-solid fa-star" style="color: #f59e0b;"></i> Destacar imóvel no site/vitrine
+                </span>
               </label>
             </div>
-            <div class="form-group form-full mt-2">
+            <div class="form-group form-full">
               <label class="label">Observações Internas</label>
-              <textarea class="input" formControlName="observacoes" rows="3" placeholder="Informações visíveis apenas para a equipe..."></textarea>
+              <textarea class="input" formControlName="observacoes" rows="3"
+                placeholder="Informações visíveis apenas para a equipe..."></textarea>
             </div>
           </div>
         </div>
-        
       </form>
+      
       <div class="modal-footer">
         <button class="btn btn-secondary" type="button" (click)="fecharModal()">Cancelar</button>
-        <button class="btn btn-primary" type="button" (click)="salvar()" [disabled]="formSubmitting()">
-          @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Salvando... }
-          @else { <i class="fa-solid fa-check"></i> {{ editingItem() ? 'Salvar Alterações' : 'Cadastrar Imóvel' }} }
+        <button class="btn btn-primary" type="button" (click)="editingItem() ? salvar() : salvarComImagens()" [disabled]="formSubmitting()">
+          @if (formSubmitting()) { 
+            <i class="fa-solid fa-circle-notch fa-spin"></i> Salvando... 
+          } @else { 
+            <i class="fa-solid fa-check"></i> {{ editingItem() ? 'Salvar Alterações' : 'Cadastrar Imóvel' }} 
+          }
         </button>
       </div>
     </div>
   </div>
 }
 
-<app-confirm-dialog [visible]="showConfirmDialog()" [data]="confirmDialogData()"
-  (confirm)="onConfirm()" (cancel)="onCancelConfirm()">
+<!-- Modal: Gerenciar Imagens -->
+@if (showImagensModal()) {
+  <div class="modal-overlay" (click)="fecharModalImagens()">
+    <div class="modal-card modal-card-lg animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <div class="modal-icon-wrapper">
+            <i class="fa-solid fa-image"></i>
+          </div>
+          <div>
+            <h3 class="modal-title">Gerenciar Imagens</h3>
+            <p class="modal-subtitle">{{ editingItem()?.endereco }}, {{ editingItem()?.numero || 'S/N' }}</p>
+          </div>
+        </div>
+        <button class="btn-icon modal-close" (click)="fecharModalImagens()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="upload-area" (click)="fileInputGaleria.click()">
+          <i class="fa-solid fa-cloud-upload-alt"></i>
+          <span>Adicionar mais imagens</span>
+          <small>Formatos: JPG, PNG, WEBP (Máx: 5MB cada)</small>
+          <input 
+            type="file" 
+            #fileInputGaleria 
+            multiple 
+            accept="image/jpeg,image/png,image/webp" 
+            style="display: none"
+            (change)="uploadImagens()">
+        </div>
+
+        @if (uploadingImagens()) {
+          <div class="upload-loading">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <span>Enviando imagens...</span>
+          </div>
+        }
+
+        @if (imagensExistentes().length > 0) {
+          <div class="imagens-gallery">
+            @for (img of imagensExistentes(); track img.id) {
+              <div class="gallery-item" [class.principal]="img.principal">
+                <img [src]="'data:' + img.contentType + ';base64,' + img.imagemBase64" alt="Imagem do imóvel">
+                <div class="gallery-overlay">
+                  @if (!img.principal) {
+                    <button class="btn-gallery btn-star" (click)="definirComoPrincipal(img.id)" title="Definir como principal">
+                      <i class="fa-solid fa-star"></i>
+                    </button>
+                  }
+                  <button class="btn-gallery btn-trash" (click)="removerImagem(img.id)" title="Remover">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+                @if (img.principal) {
+                  <div class="principal-badge">
+                    <i class="fa-solid fa-star"></i> Principal
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <app-empty-state 
+            icon="fa-solid fa-images" 
+            title="Nenhuma imagem" 
+            message="Adicione imagens para destacar este imóvel">
+          </app-empty-state>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="fecharModalImagens()">Fechar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<app-confirm-dialog 
+  [visible]="showConfirmDialog()" 
+  [data]="confirmDialogData()" 
+  (confirm)="onConfirm()"
+  (cancel)="onCancelConfirm()">
 </app-confirm-dialog>
