@@ -9,7 +9,7 @@ import { CurrencyBrPipe } from '../../../../shared/pipes/currency-br.pipe';
 import { ImovelService } from '../../../../core/services/imovel.service';
 import { ProprietarioService } from '../../../../core/services/proprietario.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { ImovelResponse, ImovelRequest, TIPO_IMOVEL_OPTIONS, STATUS_IMOVEL_OPTIONS, ESTADOS_BR } from '../../../../core/models/imovel.model';
+import { ImovelResponse, ImovelRequest, TIPO_IMOVEL_OPTIONS, STATUS_IMOVEL_OPTIONS, ESTADOS_BR, ImagemImovelResponse } from '../../../../core/models/imovel.model';
 import { ProprietarioResponse } from '../../../../core/models/proprietario.model';
 import { CpfCnpjPipe } from 'src/app/shared';
 
@@ -37,7 +37,7 @@ export class ImoveisListComponent implements OnInit {
   imoveis = signal<ImovelResponse[]>([]);
   proprietarios = signal<ProprietarioResponse[]>([]);
   loading = signal(false);
-  
+
   // Filtros
   searchTerm = signal('');
   filterStatus = signal<string>('');
@@ -46,6 +46,12 @@ export class ImoveisListComponent implements OnInit {
   showFormModal = signal(false);
   editingItem = signal<ImovelResponse | null>(null);
   formSubmitting = signal(false);
+
+  imagensSelecionadas = signal<File[]>([]);
+  imagensPreview = signal<string[]>([]);
+  imagensExistentes = signal<ImagemImovelResponse[]>([]);
+  showImagensModal = signal(false);
+  uploadingImagens = signal(false);
 
   showConfirmDialog = signal(false);
   confirmDialogData = signal<ConfirmDialogData>({ title: '', message: '' });
@@ -189,10 +195,23 @@ export class ImoveisListComponent implements OnInit {
     this.formSubmitting.set(true);
     const dto: ImovelRequest = this.form.value;
     const editing = this.editingItem();
+    const imagens = this.imagensSelecionadas();
 
-    const obs = editing
-      ? this.service.atualizar(editing.id, dto)
-      : this.service.criar(dto);
+    let obs;
+
+    if (editing) {
+      if (imagens.length > 0) {
+        obs = this.service.atualizarComImagens(editing.id, dto, imagens);
+      } else {
+        obs = this.service.atualizar(editing.id, dto);
+      }
+    } else {
+      if (imagens.length > 0) {
+        obs = this.service.criarComImagens(dto, imagens);
+      } else {
+        obs = this.service.criar(dto);
+      }
+    }
 
     obs.subscribe({
       next: () => {
@@ -200,6 +219,8 @@ export class ImoveisListComponent implements OnInit {
         this.fecharModal();
         this.carregarDados();
         this.formSubmitting.set(false);
+        this.imagensSelecionadas.set([]);
+        this.imagensPreview.set([]);
       },
       error: (err) => {
         this.notification.error(err.error?.message || (editing ? 'Erro ao atualizar imóvel' : 'Erro ao cadastrar imóvel'));
@@ -226,7 +247,7 @@ export class ImoveisListComponent implements OnInit {
         this.carregarDados();
       },
       error: (err) => {
-        const msg = err.status === 409 
+        const msg = err.status === 409
           ? 'Não é possível excluir o imóvel pois existem contratos vinculados.'
           : 'Erro ao excluir imóvel';
         this.notification.error(msg);
@@ -286,5 +307,130 @@ export class ImoveisListComponent implements OnInit {
       manutencao: 'badge-secondary'
     };
     return classes[status] || 'badge-secondary';
+  }
+
+  onImagensSelecionadas(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      const files = Array.from(input.files);
+      this.imagensSelecionadas.set(files);
+
+      const previews: string[] = [];
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previews.push(e.target?.result as string);
+          if (previews.length === files.length) {
+            this.imagensPreview.set(previews);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  }
+
+  abrirModalImagens(imovel: ImovelResponse): void {
+    this.editingItem.set(imovel);
+    this.carregarImagensExistentes(imovel.id);
+    this.showImagensModal.set(true);
+  }
+
+  carregarImagensExistentes(imovelId: number): void {
+    this.service.listarImagens(imovelId).subscribe({
+      next: (imagens) => this.imagensExistentes.set(imagens),
+      error: () => this.notification.error('Erro ao carregar imagens')
+    });
+  }
+
+  uploadImagens(): void {
+    if (this.imagensSelecionadas().length === 0) {
+      this.notification.warning('Selecione pelo menos uma imagem');
+      return;
+    }
+
+    this.uploadingImagens.set(true);
+    const imovelId = this.editingItem()!.id;
+
+    this.service.uploadImagens(imovelId, this.imagensSelecionadas()).subscribe({
+      next: (imagens) => {
+        this.notification.success(`${imagens.length} imagem(ns) enviada(s) com sucesso`);
+        this.imagensSelecionadas.set([]);
+        this.imagensPreview.set([]);
+        this.carregarImagensExistentes(imovelId);
+        this.carregarDados();
+        this.uploadingImagens.set(false);
+      },
+      error: (err) => {
+        this.notification.error('Erro ao enviar imagens');
+        this.uploadingImagens.set(false);
+      }
+    });
+  }
+
+  removerImagem(imagemId: number): void {
+    const imovelId = this.editingItem()!.id;
+    this.service.removerImagem(imovelId, imagemId).subscribe({
+      next: () => {
+        this.notification.success('Imagem removida com sucesso');
+        this.carregarImagensExistentes(imovelId);
+        this.carregarDados();
+      },
+      error: () => this.notification.error('Erro ao remover imagem')
+    });
+  }
+
+  definirComoPrincipal(imagemId: number): void {
+    const imovelId = this.editingItem()!.id;
+    this.service.definirImagemPrincipal(imovelId, imagemId).subscribe({
+      next: () => {
+        this.notification.success('Imagem principal definida');
+        this.carregarImagensExistentes(imovelId);
+        this.carregarDados();
+      },
+      error: () => this.notification.error('Erro ao definir imagem principal')
+    });
+  }
+
+  getImagemPrincipal(): ImagemImovelResponse | undefined {
+    return this.imagensExistentes().find(img => img.principal);
+  }
+
+  salvarComImagens(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.formSubmitting.set(true);
+    const dto: ImovelRequest = this.form.value;
+    const imagens = this.imagensSelecionadas();
+
+    this.service.criarComImagens(dto, imagens).subscribe({
+      next: () => {
+        this.notification.success('Imóvel cadastrado com sucesso');
+        this.fecharModal();
+        this.carregarDados();
+        this.formSubmitting.set(false);
+        this.imagensSelecionadas.set([]);
+        this.imagensPreview.set([]);
+      },
+      error: (err) => {
+        this.notification.error(err.error?.message || 'Erro ao cadastrar imóvel');
+        this.formSubmitting.set(false);
+      }
+    });
+  }
+
+  fecharModalImagens(): void {
+    this.showImagensModal.set(false);
+    this.imagensSelecionadas.set([]);
+    this.imagensPreview.set([]);
+  }
+
+  removerPreview(index: number): void {
+    const novasPreviews = this.imagensPreview().filter((_, i) => i !== index);
+    const novosArquivos = this.imagensSelecionadas().filter((_, i) => i !== index);
+    this.imagensPreview.set(novasPreviews);
+    this.imagensSelecionadas.set(novosArquivos);
   }
 }

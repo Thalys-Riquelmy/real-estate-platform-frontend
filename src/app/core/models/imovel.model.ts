@@ -1,6 +1,15 @@
 import { EmpresaResponse } from './empresa.model';
 import { ProprietarioResponse } from './proprietario.model';
 
+// Adicione esta interface
+export interface ImagemImovelResponse {
+  id: number;
+  ordem: number;
+  principal: boolean;
+  contentType: string;
+  imagemBase64: string;
+}
+
 export interface ImovelResponse {
   id: number;
   tipo: string;
@@ -20,7 +29,7 @@ export interface ImovelResponse {
   valorVenda: number;
   valorAluguel: number;
   status: string;
-  fotos: string;
+  imagens?: ImagemImovelResponse[];
   destaque: boolean;
   observacoes: string;
   createdAt: string;
