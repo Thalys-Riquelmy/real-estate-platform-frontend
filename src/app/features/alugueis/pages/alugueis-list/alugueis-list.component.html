@@ -1,10 +1,6 @@
 <!-- Page Header -->
-<app-page-header
-  title="Gestão de Aluguéis"
-  subtitle="Contratos de locação e acompanhamento de recebimentos"
-  buttonText="Novo Contrato"
-  buttonIcon="fa-solid fa-file-signature"
-  (buttonClick)="abrirModalNovo()">
+<app-page-header title="Gestão de Aluguéis" subtitle="Contratos de locação e acompanhamento de recebimentos"
+  buttonText="Novo Contrato" buttonIcon="fa-solid fa-file-signature" (buttonClick)="abrirModalNovo()">
 </app-page-header>
 
 <!-- Stats Cards -->
@@ -43,8 +39,8 @@
 <div class="filters-bar card">
   <div class="search-box">
     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-    <input type="text" class="input search-input" placeholder="Buscar por imóvel ou cliente..."
-      [value]="searchTerm()" (input)="onSearchChange($event)">
+    <input type="text" class="input search-input" placeholder="Buscar por imóvel ou cliente..." [value]="searchTerm()"
+      (input)="onSearchChange($event)">
   </div>
   <div class="filter-group">
     <select class="input filter-select" [value]="filterStatus()" (change)="onFilterStatusChange($event)">
@@ -64,291 +60,410 @@
   <app-loading [visible]="loading()" message="Carregando contratos..."></app-loading>
 
   @if (!loading() && filteredItems().length === 0) {
-    <app-empty-state icon="fa-solid fa-file-circle-xmark" title="Nenhum contrato encontrado"
-      [message]="searchTerm() || filterStatus() ? 'Tente ajustar os filtros de busca.' : 'Crie seu primeiro contrato de locação clicando no botão acima.'">
-    </app-empty-state>
+  <app-empty-state icon="fa-solid fa-file-circle-xmark" title="Nenhum contrato encontrado"
+    [message]="searchTerm() || filterStatus() ? 'Tente ajustar os filtros de busca.' : 'Crie seu primeiro contrato de locação clicando no botão acima.'">
+  </app-empty-state>
   }
 
   @if (!loading() && filteredItems().length > 0) {
-    <div class="table-container table-animate">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Imóvel / Cliente</th>
-            <th>Detalhes do Contrato</th>
-            <th>Valor Mensal</th>
-            <th>Status</th>
-            <th class="text-center">Prestações</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of filteredItems(); track item.id) {
-            <tr class="table-row-animate">
-              <td>
-                <div class="contrato-cell">
-                  <div class="imovel-info">
-                    <span class="info-title"><i class="fa-solid fa-house fa-fw text-muted"></i> {{ item.imovel?.endereco }}, {{ item.imovel?.numero || 'S/N' }}</span>
-                    <span class="info-subtitle"><i class="fa-solid fa-user fa-fw text-muted"></i> Loc: {{ item.cliente?.nome }}</span>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="contrato-detalhes">
-                  <span class="detalhe-item"><i class="fa-regular fa-calendar-check"></i> Início: {{ item.dataInicio | dateBr }}</span>
-                  @if (item.dataFim) {
-                    <span class="detalhe-item"><i class="fa-regular fa-calendar-xmark"></i> Fim: {{ item.dataFim | dateBr }}</span>
-                  }
-                  <span class="detalhe-item"><i class="fa-regular fa-clock"></i> Vencimento: dia {{ item.diaVencimento }}</span>
-                </div>
-              </td>
-              <td>
-                <span class="valor-destaque">{{ item.valorAluguel | currencyBr }}</span>
-              </td>
-              <td>
-                <span class="badge" [ngClass]="getStatusClass(item.status)">
-                  {{ item.status | uppercase }}
-                </span>
-                <div class="status-quick-actions" style="margin-top: 0.25rem;">
-                   <select class="input" style="padding: 0.2rem; font-size: 0.7rem; height: auto;" 
-                          (change)="mudarStatusRapido(item, $any($event.target).value)">
-                     <option value="">Alterar...</option>
-                     <option value="ativo" [disabled]="item.status === 'ativo'">Ativar</option>
-                     <option value="encerrado" [disabled]="item.status === 'encerrado'">Encerrar</option>
-                   </select>
-                </div>
-              </td>
-              <td>
-                <div class="actions-cell">
-                  <button class="btn btn-secondary btn-sm" (click)="abrirModalPrestacoes(item)" title="Ver Recebimentos">
-                    <i class="fa-solid fa-list-check"></i> Recebimentos
-                  </button>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    <div class="table-footer">
-      <span class="results-count">Exibindo <strong>{{ filteredItems().length }}</strong> de <strong>{{ totalItems() }}</strong> contrato(s)</span>
-    </div>
+  <div class="table-container table-animate">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Imóvel / Cliente</th>
+          <th>Detalhes do Contrato</th>
+          <th>Valor Mensal</th>
+          <th>Status</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of filteredItems(); track item.id) {
+        <tr class="table-row-animate">
+          <td>
+            <div class="contrato-cell">
+              <div class="imovel-info">
+                <span class="info-title"><i class="fa-solid fa-house fa-fw text-muted"></i> {{ item.imovel?.endereco }},
+                  {{ item.imovel?.numero || 'S/N' }}</span>
+                <span class="info-subtitle"><i class="fa-solid fa-user fa-fw text-muted"></i> Loc: {{ item.cliente?.nome
+                  }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="contrato-detalhes">
+              <span class="detalhe-item"><i class="fa-regular fa-calendar-check"></i> Início: {{ item.dataInicio |
+                dateBr }}</span>
+              @if (item.dataFim) {
+              <span class="detalhe-item"><i class="fa-regular fa-calendar-xmark"></i> Fim: {{ item.dataFim | dateBr
+                }}</span>
+              }
+              <span class="detalhe-item"><i class="fa-regular fa-clock"></i> Vencimento: dia {{ item.diaVencimento
+                }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="valor-destaque">{{ item.valorAluguel | currencyBr }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getStatusClass(item.status)">
+              {{ item.status | uppercase }}
+            </span>
+            <div class="status-quick-actions" style="margin-top: 0.25rem;">
+              <select class="input" style="padding: 0.2rem; font-size: 0.7rem; height: auto;"
+                (change)="mudarStatusRapido(item, $any($event.target).value)">
+                <option value="">Alterar...</option>
+                <option value="ativo" [disabled]="item.status === 'ativo'">Ativar</option>
+                <option value="encerrado" [disabled]="item.status === 'encerrado'">Encerrar</option>
+              </select>
+            </div>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-action btn-action-pdf" (click)="abrirModalContrato(item)" title="Ver Contrato PDF">
+                <i class="fa-solid fa-file-pdf"></i>
+              </button>
+              <button class="btn btn-secondary btn-sm" (click)="abrirModalPrestacoes(item)" title="Ver Recebimentos">
+                <i class="fa-solid fa-list-check"></i> Recebimentos
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="table-footer">
+    <span class="results-count">Exibindo <strong>{{ filteredItems().length }}</strong> de <strong>{{ totalItems()
+        }}</strong> contrato(s)</span>
+  </div>
   }
 </div>
 
 <!-- Modal: Criar Contrato -->
 @if (showFormModal()) {
-  <div class="modal-overlay" (click)="fecharModal()">
-    <div class="modal-card modal-card-lg animate-slide-up" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-header-content">
-          <div class="modal-icon-wrapper"><i class="fa-solid fa-file-signature"></i></div>
-          <div>
-            <h3 class="modal-title">Novo Contrato de Aluguel</h3>
-            <p class="modal-subtitle">Preencha os dados para registrar a locação</p>
-          </div>
+<div class="modal-overlay" (click)="fecharModal()">
+  <div class="modal-card modal-card-lg animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-content">
+        <div class="modal-icon-wrapper"><i class="fa-solid fa-file-signature"></i></div>
+        <div>
+          <h3 class="modal-title">Novo Contrato de Aluguel</h3>
+          <p class="modal-subtitle">Preencha os dados para registrar a locação</p>
         </div>
-        <button class="btn-icon modal-close" (click)="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
-        
-        <div class="form-section">
-          <h4 class="form-section-title"><i class="fa-solid fa-handshake"></i> Partes do Contrato</h4>
-          <div class="form-grid">
-            <div class="form-group form-full">
-              <label class="label"><i class="fa-solid fa-house form-label-icon"></i> Imóvel *</label>
-              <select class="input" formControlName="imovelId" (change)="onImovelChange($event)"
-                [class.input-error]="form.get('imovelId')?.invalid && form.get('imovelId')?.touched">
-                <option [ngValue]="null">Selecione o imóvel</option>
-                @for (imov of imoveis(); track imov.id) {
-                  <option [ngValue]="imov.id">{{ imov.endereco }}, {{ imov.numero || 'S/N' }} - {{ imov.bairro }} ({{ imov.valorAluguel | currencyBr }})</option>
-                }
-              </select>
-              @if (form.get('imovelId')?.invalid && form.get('imovelId')?.touched) {
-                <span class="error-text">Imóvel é obrigatório</span>
-              }
-            </div>
-            
-            <div class="form-group form-full">
-              <label class="label"><i class="fa-solid fa-user form-label-icon"></i> Locatário (Cliente) *</label>
-              <select class="input" formControlName="clienteId"
-                [class.input-error]="form.get('clienteId')?.invalid && form.get('clienteId')?.touched">
-                <option [ngValue]="null">Selecione o locatário</option>
-                @for (cli of clientes(); track cli.id) {
-                  <option [ngValue]="cli.id">{{ cli.nome }} ({{ cli.cpfCnpj }})</option>
-                }
-              </select>
-              @if (form.get('clienteId')?.invalid && form.get('clienteId')?.touched) {
-                <span class="error-text">Locatário é obrigatório</span>
-              }
-            </div>
-          </div>
-        </div>
+      <button class="btn-icon modal-close" (click)="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
 
-        <div class="form-section">
-          <h4 class="form-section-title"><i class="fa-solid fa-calendar-days"></i> Prazos e Valores</h4>
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="label">Data de Início *</label>
-              <input type="date" class="input" formControlName="dataInicio"
-                [class.input-error]="form.get('dataInicio')?.invalid && form.get('dataInicio')?.touched">
-            </div>
-            
-            <div class="form-group">
-              <label class="label">Data de Fim (Opcional)</label>
-              <input type="date" class="input" formControlName="dataFim">
-            </div>
-            
-            <div class="form-group">
-              <label class="label">Dia do Vencimento *</label>
-              <input type="number" class="input" formControlName="diaVencimento" min="1" max="31"
-                [class.input-error]="form.get('diaVencimento')?.invalid && form.get('diaVencimento')?.touched">
-            </div>
-            
-            <div class="form-group">
-              <label class="label">Valor do Aluguel (R$) *</label>
-              <input type="number" class="input" formControlName="valorAluguel" min="1" step="0.01"
-                [class.input-error]="form.get('valorAluguel')?.invalid && form.get('valorAluguel')?.touched">
-            </div>
+      <div class="form-section">
+        <h4 class="form-section-title"><i class="fa-solid fa-handshake"></i> Partes do Contrato</h4>
+        <div class="form-grid">
+          <div class="form-group form-full">
+            <label class="label"><i class="fa-solid fa-house form-label-icon"></i> Imóvel *</label>
+            <select class="input" formControlName="imovelId" (change)="onImovelChange($event)"
+              [class.input-error]="form.get('imovelId')?.invalid && form.get('imovelId')?.touched">
+              <option [ngValue]="null">Selecione o imóvel</option>
+              @for (imov of imoveis(); track imov.id) {
+              <option [ngValue]="imov.id">{{ imov.endereco }}, {{ imov.numero || 'S/N' }} - {{ imov.bairro }} ({{
+                imov.valorAluguel | currencyBr }})</option>
+              }
+            </select>
+            @if (form.get('imovelId')?.invalid && form.get('imovelId')?.touched) {
+            <span class="error-text">Imóvel é obrigatório</span>
+            }
+          </div>
+
+          <div class="form-group form-full">
+            <label class="label"><i class="fa-solid fa-user form-label-icon"></i> Locatário (Cliente) *</label>
+            <select class="input" formControlName="clienteId"
+              [class.input-error]="form.get('clienteId')?.invalid && form.get('clienteId')?.touched">
+              <option [ngValue]="null">Selecione o locatário</option>
+              @for (cli of clientes(); track cli.id) {
+              <option [ngValue]="cli.id">{{ cli.nome }} ({{ cli.cpfCnpj }})</option>
+              }
+            </select>
+            @if (form.get('clienteId')?.invalid && form.get('clienteId')?.touched) {
+            <span class="error-text">Locatário é obrigatório</span>
+            }
           </div>
         </div>
-      </form>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" (click)="fecharModal()">Cancelar</button>
-        <button class="btn btn-primary" type="button" (click)="salvar()" [disabled]="formSubmitting()">
-          @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Criando... }
-          @else { <i class="fa-solid fa-check"></i> Criar Contrato }
-        </button>
       </div>
+
+      <div class="form-section">
+        <h4 class="form-section-title"><i class="fa-solid fa-calendar-days"></i> Prazos e Valores</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="label">Data de Início *</label>
+            <input type="date" class="input" formControlName="dataInicio"
+              [class.input-error]="form.get('dataInicio')?.invalid && form.get('dataInicio')?.touched">
+          </div>
+
+          <div class="form-group">
+            <label class="label">Data de Fim (Opcional)</label>
+            <input type="date" class="input" formControlName="dataFim">
+          </div>
+
+          <div class="form-group">
+            <label class="label">Dia do Vencimento *</label>
+            <input type="number" class="input" formControlName="diaVencimento" min="1" max="31"
+              [class.input-error]="form.get('diaVencimento')?.invalid && form.get('diaVencimento')?.touched">
+          </div>
+
+          <div class="form-group">
+            <label class="label">Valor do Aluguel (R$) *</label>
+            <input type="number" class="input" formControlName="valorAluguel" min="1" step="0.01"
+              [class.input-error]="form.get('valorAluguel')?.invalid && form.get('valorAluguel')?.touched">
+          </div>
+        </div>
+      </div>
+
+      <!-- PDF Upload Section -->
+      <div class="form-section">
+        <h4 class="form-section-title"><i class="fa-solid fa-file-pdf"></i> Contrato Assinado (PDF)</h4>
+
+        @if (!contratoSelecionado()) {
+        <div class="upload-area" (click)="fileInputContrato.click()">
+          <i class="fa-solid fa-cloud-upload-alt"></i>
+          <span>Clique para selecionar o PDF do contrato assinado</span>
+          <small>Formatos: PDF (Máx: 10MB)</small>
+          <input type="file" #fileInputContrato id="contratoInput" accept="application/pdf" style="display: none"
+            (change)="onContratoSelecionado($event)">
+        </div>
+        } @else {
+        <div class="pdf-info">
+          <div class="pdf-info-content">
+            <i class="fa-solid fa-file-pdf" style="color: #ef4444; font-size: 2rem;"></i>
+            <div class="pdf-details">
+              <span class="pdf-name">{{ contratoSelecionado()?.name }}</span>
+              <span class="pdf-size">{{ (contratoSelecionado()?.size || 0) / 1024 | number:'1.0-0' }} KB</span>
+            </div>
+          </div>
+          <button type="button" class="btn-remove-pdf" (click)="removerContratoSelecionado()">
+            <i class="fa-solid fa-times"></i> Remover
+          </button>
+        </div>
+        }
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" (click)="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" (click)="salvar()" [disabled]="formSubmitting()">
+        @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Criando... }
+        @else { <i class="fa-solid fa-check"></i> Criar Contrato }
+      </button>
     </div>
   </div>
+</div>
 }
 
 <!-- Modal: Prestações do Aluguel -->
 @if (showPrestacoesModal() && selectedAluguel()) {
-  <div class="modal-overlay" (click)="fecharModalPrestacoes()">
-    <div class="modal-card modal-card-xl animate-slide-up" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-header-content">
-          <div class="modal-icon-wrapper"><i class="fa-solid fa-list-check"></i></div>
-          <div>
-            <h3 class="modal-title">Recebimentos do Contrato</h3>
-            <p class="modal-subtitle">Imóvel: {{ selectedAluguel()?.imovel?.endereco }} | Locatário: {{ selectedAluguel()?.cliente?.nome }}</p>
-          </div>
+<div class="modal-overlay" (click)="fecharModalPrestacoes()">
+  <div class="modal-card modal-card-xl animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-content">
+        <div class="modal-icon-wrapper"><i class="fa-solid fa-list-check"></i></div>
+        <div>
+          <h3 class="modal-title">Recebimentos do Contrato</h3>
+          <p class="modal-subtitle">Imóvel: {{ selectedAluguel()?.imovel?.endereco }} | Locatário: {{
+            selectedAluguel()?.cliente?.nome }}</p>
         </div>
-        <button class="btn-icon modal-close" (click)="fecharModalPrestacoes()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      
-      <div class="modal-body">
-        <div class="actions-bar" style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
-          <button class="btn btn-secondary btn-sm" (click)="gerarMaisPrestacoes()" [disabled]="loadingPrestacoes()">
-            <i class="fa-solid fa-calendar-plus"></i> Gerar +12 Meses
-          </button>
-        </div>
+      <button class="btn-icon modal-close" (click)="fecharModalPrestacoes()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
-        <div class="table-container">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Vencimento</th>
-                <th>Valor Esperado</th>
-                <th>Status</th>
-                <th>Detalhes do Pgto</th>
-                <th class="text-center">Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (loadingPrestacoes()) {
-                <tr><td colspan="5" class="text-center py-4"><i class="fa-solid fa-circle-notch fa-spin text-primary"></i> Carregando...</td></tr>
-              } @else if (prestacoes().length === 0) {
-                <tr><td colspan="5" class="text-center py-4 text-muted">Nenhuma prestação gerada. Clique em "Gerar +12 Meses".</td></tr>
-              } @else {
-                @for (prest of prestacoes(); track prest.id) {
-                  <tr>
-                    <td><strong>{{ prest.dataVencimento | dateBr }}</strong></td>
-                    <td>{{ prest.valor | currencyBr }}</td>
-                    <td>
-                      <span class="badge" [ngClass]="getStatusClass(prest.status)">
-                        {{ prest.status | uppercase }}
-                      </span>
-                    </td>
-                    <td>
-                      @if (prest.dataPagamento) {
-                        <div style="font-size: 0.8rem; color: var(--slate-600);">
-                          <div><strong>Data:</strong> {{ prest.dataPagamento | dateBr }}</div>
-                          <div><strong>Valor:</strong> {{ prest.valorPago | currencyBr }}</div>
-                          <div><strong>Forma:</strong> {{ prest.formaPagamento }}</div>
-                        </div>
-                      } @else {
-                        <span class="text-muted" style="font-size: 0.8rem;">Aguardando pgto.</span>
-                      }
-                    </td>
-                    <td class="text-center">
-                      @if (prest.status !== 'pago') {
-                        <button class="btn btn-primary btn-sm" (click)="abrirModalPagamento(prest)">
-                          <i class="fa-solid fa-money-bill-wave"></i> Pagar
-                        </button>
-                      } @else {
-                        <span class="text-success"><i class="fa-solid fa-check-circle"></i></span>
-                      }
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
+    <div class="modal-body">
+      <div class="actions-bar" style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+        <button class="btn btn-secondary btn-sm" (click)="gerarMaisPrestacoes()" [disabled]="loadingPrestacoes()">
+          <i class="fa-solid fa-calendar-plus"></i> Gerar +12 Meses
+        </button>
       </div>
-      
-      <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" (click)="fecharModalPrestacoes()">Fechar</button>
+
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Vencimento</th>
+              <th>Valor Esperado</th>
+              <th>Status</th>
+              <th>Detalhes do Pgto</th>
+              <th class="text-center">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loadingPrestacoes()) {
+            <tr>
+              <td colspan="5" class="text-center py-4"><i class="fa-solid fa-circle-notch fa-spin text-primary"></i>
+                Carregando...</td>
+            </tr>
+            } @else if (prestacoes().length === 0) {
+            <tr>
+              <td colspan="5" class="text-center py-4 text-muted">Nenhuma prestação gerada. Clique em "Gerar +12 Meses".
+              </td>
+            </tr>
+            } @else {
+            @for (prest of prestacoes(); track prest.id) {
+            <tr>
+              <td><strong>{{ prest.dataVencimento | dateBr }}</strong></td>
+              <td>{{ prest.valor | currencyBr }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(prest.status)">
+                  {{ prest.status | uppercase }}
+                </span>
+              </td>
+              <td>
+                @if (prest.dataPagamento) {
+                <div style="font-size: 0.8rem; color: var(--slate-600);">
+                  <div><strong>Data:</strong> {{ prest.dataPagamento | dateBr }}</div>
+                  <div><strong>Valor:</strong> {{ prest.valorPago | currencyBr }}</div>
+                  <div><strong>Forma:</strong> {{ prest.formaPagamento }}</div>
+                </div>
+                } @else {
+                <span class="text-muted" style="font-size: 0.8rem;">Aguardando pgto.</span>
+                }
+              </td>
+              <td class="text-center">
+                @if (prest.status !== 'pago') {
+                <button class="btn btn-primary btn-sm" (click)="abrirModalPagamento(prest)">
+                  <i class="fa-solid fa-money-bill-wave"></i> Pagar
+                </button>
+                } @else {
+                <span class="text-success"><i class="fa-solid fa-check-circle"></i></span>
+                }
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
       </div>
     </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" (click)="fecharModalPrestacoes()">Fechar</button>
+    </div>
   </div>
+</div>
 }
 
 <!-- Modal: Registrar Pagamento -->
 @if (showPagarModal() && selectedPrestacao()) {
-  <div class="modal-overlay" style="z-index: 2050;" (click)="fecharModalPagamento()">
-    <div class="modal-card modal-card-sm animate-slide-up" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3 class="modal-title" style="font-size: 1rem;"><i class="fa-solid fa-money-bill-wave text-primary"></i> Registrar Pagamento</h3>
-        <button class="btn-icon modal-close" (click)="fecharModalPagamento()"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      
-      <form [formGroup]="formPagamento" (ngSubmit)="confirmarPagamento()" class="modal-body" style="padding-top: 1rem;">
-        <div class="info-alert mb-4" style="background: var(--slate-50); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--slate-200); font-size: 0.85rem;">
-          <div><strong>Vencimento:</strong> {{ selectedPrestacao()?.dataVencimento | dateBr }}</div>
-          <div><strong>Valor Esperado:</strong> {{ selectedPrestacao()?.valor | currencyBr }}</div>
-        </div>
+<div class="modal-overlay" style="z-index: 2050;" (click)="fecharModalPagamento()">
+  <div class="modal-card modal-card-sm animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title" style="font-size: 1rem;"><i class="fa-solid fa-money-bill-wave text-primary"></i>
+        Registrar Pagamento</h3>
+      <button class="btn-icon modal-close" (click)="fecharModalPagamento()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
-        <div class="form-group mb-3">
-          <label class="label">Data do Pagamento *</label>
-          <input type="date" class="input" formControlName="dataPagamento">
-        </div>
-        
-        <div class="form-group mb-3">
-          <label class="label">Forma de Pagamento *</label>
-          <select class="input" formControlName="formaPagamento">
-            <option value="PIX">PIX</option>
-            <option value="BOLETO">Boleto</option>
-            <option value="TRANSFERENCIA">Transferência Bancária</option>
-            <option value="DINHEIRO">Dinheiro</option>
-          </select>
-        </div>
-        
-        <div class="form-group mb-0">
-          <label class="label">Observações (Opcional)</label>
-          <textarea class="input" formControlName="observacao" rows="2" placeholder="Ex: Pago com juros via TED"></textarea>
-        </div>
-      </form>
-      
-      <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" (click)="fecharModalPagamento()">Cancelar</button>
-        <button class="btn btn-primary" type="button" (click)="confirmarPagamento()" [disabled]="formSubmitting()">
-          @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Registrando... }
-          @else { <i class="fa-solid fa-check"></i> Confirmar Pgto }
-        </button>
+    <form [formGroup]="formPagamento" (ngSubmit)="confirmarPagamento()" class="modal-body" style="padding-top: 1rem;">
+      <div class="info-alert mb-4"
+        style="background: var(--slate-50); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--slate-200); font-size: 0.85rem;">
+        <div><strong>Vencimento:</strong> {{ selectedPrestacao()?.dataVencimento | dateBr }}</div>
+        <div><strong>Valor Esperado:</strong> {{ selectedPrestacao()?.valor | currencyBr }}</div>
       </div>
+
+      <div class="form-group mb-3">
+        <label class="label">Data do Pagamento *</label>
+        <input type="date" class="input" formControlName="dataPagamento">
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="label">Forma de Pagamento *</label>
+        <select class="input" formControlName="formaPagamento">
+          <option value="PIX">PIX</option>
+          <option value="BOLETO">Boleto</option>
+          <option value="TRANSFERENCIA">Transferência Bancária</option>
+          <option value="DINHEIRO">Dinheiro</option>
+        </select>
+      </div>
+
+      <div class="form-group mb-0">
+        <label class="label">Observações (Opcional)</label>
+        <textarea class="input" formControlName="observacao" rows="2"
+          placeholder="Ex: Pago com juros via TED"></textarea>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" (click)="fecharModalPagamento()">Cancelar</button>
+      <button class="btn btn-primary" type="button" (click)="confirmarPagamento()" [disabled]="formSubmitting()">
+        @if (formSubmitting()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Registrando... }
+        @else { <i class="fa-solid fa-check"></i> Confirmar Pgto }
+      </button>
     </div>
   </div>
+</div>
+}
+
+<!-- Modal: Visualizar Contrato PDF -->
+@if (showContratoModal() && selectedAluguel()) {
+<div class="modal-overlay" (click)="fecharModalContrato()">
+  <div class="modal-card modal-card-xl animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-content">
+        <div class="modal-icon-wrapper"><i class="fa-solid fa-file-pdf"
+            style="background: #fef2f2; color: #dc2626;"></i></div>
+        <div>
+          <h3 class="modal-title">Contrato de Aluguel</h3>
+          <p class="modal-subtitle">Imóvel: {{ selectedAluguel()?.imovel?.endereco }} | Cliente: {{
+            selectedAluguel()?.cliente?.nome }}</p>
+        </div>
+      </div>
+      <button class="btn-icon modal-close" (click)="fecharModalContrato()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="modal-body" style="padding: 0;">
+      <div class="pdf-toolbar"
+        style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--slate-100); border-bottom: 1px solid var(--slate-200); flex-wrap: wrap; gap: 0.5rem;">
+        <div class="pdf-actions" style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary btn-sm" (click)="baixarContrato(selectedAluguel()!.id)">
+            <i class="fa-solid fa-download"></i> Baixar
+          </button>
+          <button class="btn btn-secondary btn-sm" (click)="abrirPdfNovaAba(selectedAluguel()!.id)">
+            <i class="fa-solid fa-external-link-alt"></i> Visualizar PDF
+          </button>
+        </div>
+
+        <div class="upload-contrato" style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="file" #uploadContrato accept="application/pdf" style="display: none"
+            (change)="onContratoSelecionado($event)">
+          <button class="btn btn-secondary btn-sm" (click)="uploadContrato.click()">
+            <i class="fa-solid fa-upload"></i> Enviar Contrato
+          </button>
+          @if (contratoSelecionado()) {
+          <button class="btn btn-success btn-sm" (click)="uploadContratoParaExistente()"
+            [disabled]="uploadingContrato()">
+            @if (uploadingContrato()) { <i class="fa-solid fa-circle-notch fa-spin"></i> }
+            @else { <i class="fa-solid fa-check"></i> Salvar }
+          </button>
+          }
+        </div>
+      </div>
+
+      @if (pdfCarregando()) {
+      <div class="pdf-loading">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <h4>Carregando PDF...</h4>
+      </div>
+      } @else if (pdfVisualizacao()) {
+      <iframe [src]="pdfVisualizacao() | safe" width="100%" height="600px" style="border: none;"></iframe>
+      } @else {
+      <div class="pdf-empty">
+        <i class="fa-solid fa-file-pdf"></i>
+        <h4>Nenhum contrato PDF disponível</h4>
+        <p class="text-muted">Faça o upload do contrato assinado para armazená-lo no sistema.</p>
+        <button class="btn btn-primary" (click)="uploadContrato.click()">
+          <i class="fa-solid fa-upload"></i> Enviar Contrato
+        </button>
+      </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" (click)="fecharModalContrato()">Fechar</button>
+    </div>
+  </div>
+</div>
 }
