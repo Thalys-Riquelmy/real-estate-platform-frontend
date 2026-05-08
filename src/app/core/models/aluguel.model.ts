@@ -15,6 +15,7 @@ export interface AluguelResponse {
   imovel?: ImovelResponse;
   cliente?: ClienteResponse;
   prestacoes?: PrestacaoAluguelResponse[];
+  hasContratoPdf?: boolean; 
 }
 
 export interface AluguelRequest {
@@ -44,4 +45,12 @@ export interface PagamentoParcelaRequest {
   dataPagamento?: string;
   formaPagamento?: string;
   observacao?: string;
+}
+
+export interface ContratoPdfResponse {
+  id: number;
+  nomeArquivo: string;
+  contentType: string;
+  pdfBase64: string;
+  tamanho: number;
 }
